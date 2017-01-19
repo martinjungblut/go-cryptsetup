@@ -93,10 +93,10 @@ func (device *CryptDevice) FormatLUKS(cipher string, cipher_mode string, uuid st
 	}
 
 	var c_params C.struct_crypt_params_luks1
-	c_params.data_alignment = C.size_t(params.data_alignment)
-	c_params.hash = C.CString(params.hash)
-	if params.data_device != "" {
-	    c_params.data_device = C.CString(params.data_device)
+	c_params.data_alignment = C.size_t(params.Data_alignment)
+	c_params.hash = C.CString(params.Hash)
+	if params.Data_device != "" {
+	    c_params.data_device = C.CString(params.Data_device)
 	} else {
 	    c_params.data_device = nil
 	}
