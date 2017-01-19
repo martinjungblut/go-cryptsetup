@@ -20,8 +20,8 @@ type Error struct {
 }
 
 type LUKSParams struct {
-	data_alignment int
-	data_device, hash string
+	Data_alignment int
+	Data_device, Hash string
 }
 
 type LoopAESParams struct {
