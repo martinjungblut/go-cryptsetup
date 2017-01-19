@@ -108,3 +108,52 @@ func (device *CryptDevice) FormatLUKS(cipher string, cipher_mode string, uuid st
 
 	return nil
 }
+
+func (device *CryptDevice) AddPassphraseToKeyslot(keyslot int, volume_key string, passphrase string) error {
+	var cstr_volume_key *C.char
+	if (volume_key == "") {
+	    cstr_volume_key = nil
+	} else {
+	    cstr_volume_key = C.CString(volume_key)
+	    defer C.free(unsafe.Pointer(cstr_volume_key))
+	}
+
+	cstr_passphrase := C.CString(passphrase)
+	defer C.free(unsafe.Pointer(cstr_passphrase))
+
+	err := C.crypt_keyslot_add_by_volume_key(device.device, C.int(keyslot), cstr_volume_key, C.size_t(len(volume_key)), cstr_passphrase, C.size_t(len(passphrase)))
+	if err < 0 {
+		return &Error{function: "crypt_keyslot_add_by_volume_key", code: int(err)}
+	}
+
+	return nil
+}
+
+func (device *CryptDevice) Load() error {
+	cstr_type := C.CString(C.CRYPT_LUKS1)
+	defer C.free(unsafe.Pointer(cstr_type))
+
+	err := C.crypt_load(device.device, cstr_type, nil)
+
+	if err < 0 {
+		return &Error{function: "crypt_load", code: int(err)}
+	}
+
+	return nil
+}
+
+func (device *CryptDevice) Activate(device_name string, keyslot int, passphrase string, flags int) error {
+	cstr_device_name := C.CString(device_name)
+	defer C.free(unsafe.Pointer(cstr_device_name))
+
+	cstr_passphrase := C.CString(passphrase)
+	defer C.free(unsafe.Pointer(cstr_passphrase))
+
+	err := C.crypt_activate_by_passphrase(device.device, cstr_device_name, C.int(keyslot), cstr_passphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
+
+	if err < 0 {
+		return &Error{function: "crypt_activate_by_passphrase", code: int(err)}
+	}
+
+	return nil
+}
