@@ -30,7 +30,7 @@ func TestFormatLUKS (t *testing.T) {
 		t.Error(fmt.Sprintf("Init() raised an error: %s", err.Error()))
 	}
 
-	params := LUKSParams{hash: "sha1", data_alignment: 0, data_device: ""}
+	params := LUKSParams{Hash: "sha1", Data_alignment: 0, Data_device: ""}
 
 	err = device.FormatLUKS("aes", "xts-plain64", "", "", 256 / 8, params)
 	if err != nil {
