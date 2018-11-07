@@ -1,11 +1,9 @@
 package cryptsetup
 
 /*
-#cgo CFLAGS: -O2
 #cgo LDFLAGS: -lcryptsetup
 #include <libcryptsetup.h>
 #include <stdlib.h>
-#include <stdio.h>
 */
 import "C"
 

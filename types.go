@@ -1,11 +1,7 @@
 package cryptsetup
 
 /*
-#cgo CFLAGS: -O2
-#cgo LDFLAGS: -lcryptsetup
 #include <libcryptsetup.h>
-#include <stdlib.h>
-#include <stdio.h>
 */
 import "C"
 
@@ -19,7 +15,8 @@ type LoopAESParams struct {
 	offset, skip int
 }
 
-// Device encapsulates libcryptsetup's 'crypt_device' struct.
+// Device is a handle to the crypto device.
+// It encapsulates libcryptsetup's 'crypt_device' struct.
 type Device struct {
 	device *C.struct_crypt_device
 }
