@@ -27,7 +27,7 @@ const (
 )
 
 // Init initializes a crypt device backed by 'devicePath'.
-// Returns a pointer to the newly allocated Device and any error encountered.
+// Returns a pointer to the newly allocated Device or any error encountered.
 // C equivalent: crypt_init
 func Init(devicePath string) (*Device, error) {
 	cDevicePath := C.CString(devicePath)
@@ -40,47 +40,47 @@ func Init(devicePath string) (*Device, error) {
 		return nil, &Error{functionName: "crypt_init", code: err}
 	}
 
-	return &Device{device: cDevice}, nil
+	return &Device{cDevice: cDevice}, nil
 }
 
-// FormatLUKS formats a Device using an LUKS1 partition, but does not activate it.
+// Format formats a Device, using a type-specific TypeParams parameter and a type-agnostic GenericParams parameter.
+// Returns an error, if there were any.
 // C equivalent: crypt_format
-func (device *Device) FormatLUKS(cipher string, cipherMode string, uuid string, volumeKey string, volumeKeySize int, params LUKSParams) error {
-	cStrType := C.CString(C.CRYPT_LUKS1)
-	defer C.free(unsafe.Pointer(cStrType))
+func (device *Device) Format(typeParams TypeParams, genericParams *GenericParams) error {
+	typeParams.FillDefaultValues()
+	genericParams.FillDefaultValues()
 
-	cStrCipher := C.CString(cipher)
-	defer C.free(unsafe.Pointer(cStrCipher))
+	cType := C.CString(typeParams.Type())
+	defer C.free(unsafe.Pointer(cType))
 
-	cStrCipherMode := C.CString(cipherMode)
-	defer C.free(unsafe.Pointer(cStrCipherMode))
+	cCipher := C.CString(genericParams.Cipher)
+	defer C.free(unsafe.Pointer(cCipher))
 
-	var cStrUUID *C.char
-	if uuid == "" {
-		cStrUUID = nil
+	cCipherMode := C.CString(genericParams.CipherMode)
+	defer C.free(unsafe.Pointer(cCipherMode))
+
+	var cUUID *C.char
+	if genericParams.UUID == "" {
+		cUUID = nil
 	} else {
-		cStrUUID = C.CString(uuid)
-		defer C.free(unsafe.Pointer(cStrUUID))
+		cUUID = C.CString(genericParams.UUID)
+		defer C.free(unsafe.Pointer(cUUID))
 	}
 
-	var cStrVolumeKey *C.char
-	if volumeKey == "" {
-		cStrVolumeKey = nil
+	var cVolumeKey *C.char
+	if genericParams.VolumeKey == "" {
+		cVolumeKey = nil
 	} else {
-		cStrVolumeKey = C.CString(volumeKey)
-		defer C.free(unsafe.Pointer(cStrVolumeKey))
+		cVolumeKey = C.CString(genericParams.VolumeKey)
+		defer C.free(unsafe.Pointer(cVolumeKey))
 	}
 
-	var cParams C.struct_crypt_params_luks1
-	cParams.data_alignment = C.size_t(params.DataAlignment)
-	cParams.hash = C.CString(params.Hash)
-	if params.DataDevice != "" {
-		cParams.data_device = C.CString(params.DataDevice)
-	} else {
-		cParams.data_device = nil
-	}
+	cVolumeKeySize := C.size_t(genericParams.VolumeKeySize)
 
-	err := C.crypt_format(device.device, cStrType, cStrCipher, cStrCipherMode, cStrUUID, cStrVolumeKey, C.size_t(volumeKeySize), unsafe.Pointer(&cParams))
+	cTypeParams, freeCTypeParams := typeParams.Unmanaged()
+	defer freeCTypeParams()
+
+	err := C.crypt_format(device.cPointer(), cType, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
 	if err < 0 {
 		return &Error{functionName: "crypt_format", code: int(err)}
 	}
@@ -88,51 +88,51 @@ func (device *Device) FormatLUKS(cipher string, cipherMode string, uuid string, 
 	return nil
 }
 
-func (device *Device) AddPassphraseToKeyslot(keyslot int, volume_key string, passphrase string) error {
-	var cstr_volume_key *C.char
-	if volume_key == "" {
-		cstr_volume_key = nil
-	} else {
-		cstr_volume_key = C.CString(volume_key)
-		defer C.free(unsafe.Pointer(cstr_volume_key))
-	}
+// func (device *Device) AddPassphraseToKeyslot(keyslot int, volume_key string, passphrase string) error {
+// 	var cstr_volume_key *C.char
+// 	if volume_key == "" {
+// 		cstr_volume_key = nil
+// 	} else {
+// 		cstr_volume_key = C.CString(volume_key)
+// 		defer C.free(unsafe.Pointer(cstr_volume_key))
+// 	}
 
-	cstr_passphrase := C.CString(passphrase)
-	defer C.free(unsafe.Pointer(cstr_passphrase))
+// 	cstr_passphrase := C.CString(passphrase)
+// 	defer C.free(unsafe.Pointer(cstr_passphrase))
 
-	err := C.crypt_keyslot_add_by_volume_key(device.device, C.int(keyslot), cstr_volume_key, C.size_t(len(volume_key)), cstr_passphrase, C.size_t(len(passphrase)))
-	if err < 0 {
-		return &Error{functionName: "crypt_keyslot_add_by_volume_key", code: int(err)}
-	}
+// 	err := C.crypt_keyslot_add_by_volume_key(device.device, C.int(keyslot), cstr_volume_key, C.size_t(len(volume_key)), cstr_passphrase, C.size_t(len(passphrase)))
+// 	if err < 0 {
+// 		return &Error{functionName: "crypt_keyslot_add_by_volume_key", code: int(err)}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (device *Device) Load() error {
-	cstr_type := C.CString(C.CRYPT_LUKS1)
-	defer C.free(unsafe.Pointer(cstr_type))
+// func (device *Device) Load() error {
+// 	cstr_type := C.CString(C.CRYPT_LUKS1)
+// 	defer C.free(unsafe.Pointer(cstr_type))
 
-	err := C.crypt_load(device.device, cstr_type, nil)
+// 	err := C.crypt_load(device.device, cstr_type, nil)
 
-	if err < 0 {
-		return &Error{functionName: "crypt_load", code: int(err)}
-	}
+// 	if err < 0 {
+// 		return &Error{functionName: "crypt_load", code: int(err)}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (device *Device) Activate(device_name string, keyslot int, passphrase string, flags int) error {
-	cstr_device_name := C.CString(device_name)
-	defer C.free(unsafe.Pointer(cstr_device_name))
+// func (device *Device) Activate(device_name string, keyslot int, passphrase string, flags int) error {
+// 	cstr_device_name := C.CString(device_name)
+// 	defer C.free(unsafe.Pointer(cstr_device_name))
 
-	cstr_passphrase := C.CString(passphrase)
-	defer C.free(unsafe.Pointer(cstr_passphrase))
+// 	cstr_passphrase := C.CString(passphrase)
+// 	defer C.free(unsafe.Pointer(cstr_passphrase))
 
-	err := C.crypt_activate_by_passphrase(device.device, cstr_device_name, C.int(keyslot), cstr_passphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
+// 	err := C.crypt_activate_by_passphrase(device.device, cstr_device_name, C.int(keyslot), cstr_passphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
 
-	if err < 0 {
-		return &Error{functionName: "crypt_activate_by_passphrase", code: int(err)}
-	}
+// 	if err < 0 {
+// 		return &Error{functionName: "crypt_activate_by_passphrase", code: int(err)}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
