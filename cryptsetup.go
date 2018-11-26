@@ -44,7 +44,7 @@ func Init(devicePath string) (*Device, error) {
 }
 
 // Format formats a Device, using a type-specific TypeParams parameter and a type-agnostic GenericParams parameter.
-// Returns an error, if there were any.
+// Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
 func (device *Device) Format(typeParams TypeParams, genericParams *GenericParams) error {
 	typeParams.FillDefaultValues()
@@ -108,18 +108,20 @@ func (device *Device) Format(typeParams TypeParams, genericParams *GenericParams
 // 	return nil
 // }
 
-// func (device *Device) Load() error {
-// 	cstr_type := C.CString(C.CRYPT_LUKS1)
-// 	defer C.free(unsafe.Pointer(cstr_type))
+// Load loads crypt device parameters from the on-disk header. A TypeParams parameter must be provided, indicating the device's type.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_load
+func (device *Device) Load(typeParams TypeParams) error {
+	cType := C.CString(typeParams.Type())
+	defer C.free(unsafe.Pointer(cType))
 
-// 	err := C.crypt_load(device.device, cstr_type, nil)
+	err := C.crypt_load(device.cDevice, cType, nil)
+	if err < 0 {
+		return &Error{functionName: "crypt_load", code: int(err)}
+	}
 
-// 	if err < 0 {
-// 		return &Error{functionName: "crypt_load", code: int(err)}
-// 	}
-
-// 	return nil
-// }
+	return nil
+}
 
 // func (device *Device) Activate(device_name string, keyslot int, passphrase string, flags int) error {
 // 	cstr_device_name := C.CString(device_name)

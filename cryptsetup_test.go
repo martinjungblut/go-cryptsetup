@@ -110,6 +110,10 @@ func Test_Init_WorksIfDeviceIsFound(test *testing.T) {
 	if device.cPointer() == nil {
 		test.Error("cPointer() should not be nil.")
 	}
+
+	if device.Type() != "" {
+		test.Error("Device should have no type.")
+	}
 }
 
 func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
@@ -120,7 +124,7 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	}
 }
 
-func Test_Format_LUKS1(test *testing.T) {
+func Test_LUKS1_Format(test *testing.T) {
 	device, err := Init(DevicePath)
 	if err != nil {
 		test.Error(err)
@@ -137,5 +141,28 @@ func Test_Format_LUKS1(test *testing.T) {
 
 	if hashBeforeFormat == hashAfterFormat {
 		test.Error("Unsuccessful call to Format() when using LUKS1 parameters.")
+	}
+
+	if device.Type() != "LUKS1" {
+		test.Error("Expected type: LUKS1.")
+	}
+}
+
+func Test_LUKS1_Load(test *testing.T) {
+	device, err := Init(DevicePath)
+	if err != nil {
+		test.Error(err)
+	}
+
+	luksParams := &LUKS1Params{}
+	_ = device.Format(luksParams, &GenericParams{})
+
+	err = device.Load(luksParams)
+	if err != nil {
+		test.Error(err)
+	}
+
+	if device.Type() != "LUKS1" {
+		test.Error("Expected type: LUKS1.")
 	}
 }

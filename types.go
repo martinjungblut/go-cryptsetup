@@ -17,6 +17,12 @@ func (device *Device) cPointer() *C.struct_crypt_device {
 	return device.cDevice
 }
 
+// Type returns the device's type as a string.
+// Returns an empty string if the information is not available.
+func (device *Device) Type() string {
+	return C.GoString(C.crypt_get_type(device.cPointer()))
+}
+
 // TypeParams is the interface that all device type specific parameter types must implement.
 type TypeParams interface {
 	FillDefaultValues()
