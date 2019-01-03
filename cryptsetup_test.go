@@ -120,7 +120,12 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	_, err := Init("nonExistingDevicePath")
 
 	if err == nil {
-		test.Error("Init() did not raise an error, when it should have.")
+		test.Error("Init() did not return an error, when it should have.")
+	}
+
+	code := err.(*Error).Code()
+	if code != -15 {
+		test.Error(fmt.Sprintf("Init() should have failed with error code -15, but failed with error code %d instead.", code))
 	}
 }
 

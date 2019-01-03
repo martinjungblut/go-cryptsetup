@@ -9,5 +9,10 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("Function '%s' returned error with code '%d'.", e.functionName, e.code)
+	return fmt.Sprintf("libcryptsetup function '%s' returned error with code '%d'.", e.functionName, e.code)
+}
+
+// Code returns the error code returned by a libcryptsetup function.
+func (e *Error) Code() int {
+	return e.code
 }
