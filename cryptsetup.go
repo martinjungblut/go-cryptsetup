@@ -88,26 +88,6 @@ func (device *Device) Format(typeParams TypeParams, genericParams *GenericParams
 	return nil
 }
 
-// func (device *Device) AddPassphraseToKeyslot(keyslot int, volume_key string, passphrase string) error {
-// 	var cstr_volume_key *C.char
-// 	if volume_key == "" {
-// 		cstr_volume_key = nil
-// 	} else {
-// 		cstr_volume_key = C.CString(volume_key)
-// 		defer C.free(unsafe.Pointer(cstr_volume_key))
-// 	}
-
-// 	cstr_passphrase := C.CString(passphrase)
-// 	defer C.free(unsafe.Pointer(cstr_passphrase))
-
-// 	err := C.crypt_keyslot_add_by_volume_key(device.device, C.int(keyslot), cstr_volume_key, C.size_t(len(volume_key)), cstr_passphrase, C.size_t(len(passphrase)))
-// 	if err < 0 {
-// 		return &Error{functionName: "crypt_keyslot_add_by_volume_key", code: int(err)}
-// 	}
-
-// 	return nil
-// }
-
 // Load loads crypt device parameters from the on-disk header. A TypeParams parameter must be provided, indicating the device's type.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
@@ -123,18 +103,43 @@ func (device *Device) Load(typeParams TypeParams) error {
 	return nil
 }
 
-// func (device *Device) Activate(device_name string, keyslot int, passphrase string, flags int) error {
-// 	cstr_device_name := C.CString(device_name)
-// 	defer C.free(unsafe.Pointer(cstr_device_name))
+// AddPassphraseByVolumeKey adds a passphrase to a keyslot, using a volume key to perform the required security check.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_keyslot_add_by_volume_key
+func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, passphrase string) error {
+	var cVolumeKey *C.char
+	if volumeKey == "" {
+		cVolumeKey = nil
+	} else {
+		cVolumeKey = C.CString(volumeKey)
+		defer C.free(unsafe.Pointer(cVolumeKey))
+	}
 
-// 	cstr_passphrase := C.CString(passphrase)
-// 	defer C.free(unsafe.Pointer(cstr_passphrase))
+	cPassphrase := C.CString(passphrase)
+	defer C.free(unsafe.Pointer(cPassphrase))
 
-// 	err := C.crypt_activate_by_passphrase(device.device, cstr_device_name, C.int(keyslot), cstr_passphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
+	err := C.crypt_keyslot_add_by_volume_key(device.cPointer(), C.int(keyslot), cVolumeKey, C.size_t(len(volumeKey)), cPassphrase, C.size_t(len(passphrase)))
+	if err < 0 {
+		return &Error{functionName: "crypt_keyslot_add_by_volume_key", code: int(err)}
+	}
 
-// 	if err < 0 {
-// 		return &Error{functionName: "crypt_activate_by_passphrase", code: int(err)}
-// 	}
+	return nil
+}
 
-// 	return nil
-// }
+// ActivateByPassphrase activates a device by using a passphrase from a specific keyslot.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_activate_by_passphrase
+func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passphrase string, flags int) error {
+	cDeviceName := C.CString(deviceName)
+	defer C.free(unsafe.Pointer(cDeviceName))
+
+	cPassphrase := C.CString(passphrase)
+	defer C.free(unsafe.Pointer(cPassphrase))
+
+	err := C.crypt_activate_by_passphrase(device.cPointer(), cDeviceName, C.int(keyslot), cPassphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
+	if err < 0 {
+		return &Error{functionName: "crypt_activate_by_passphrase", code: int(err)}
+	}
+
+	return nil
+}

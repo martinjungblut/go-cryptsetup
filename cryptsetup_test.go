@@ -125,7 +125,7 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 
 	code := err.(*Error).Code()
 	if code != -15 {
-		test.Error(fmt.Sprintf("Init() should have failed with error code -15, but failed with error code %d instead.", code))
+		test.Error(fmt.Sprintf("Init() should have failed with error code '-15', but code was returned '%d' instead.", code))
 	}
 }
 
@@ -169,5 +169,50 @@ func Test_LUKS1_Load(test *testing.T) {
 
 	if device.Type() != "LUKS1" {
 		test.Error("Expected type: LUKS1.")
+	}
+}
+
+func Test_AddPassphraseByVolumeKey(test *testing.T) {
+	device, err := Init(DevicePath)
+	if err != nil {
+		test.Error(err)
+	}
+
+	_ = device.Format(&LUKS1Params{}, &GenericParams{})
+
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	if err == nil {
+		test.Error("AddPassphraseByVolumeKey() should have failed with error code '-22', but no error was returned.")
+	}
+	code := err.(*Error).Code()
+	if code != -22 {
+		test.Error(fmt.Sprintf("AddPassphraseByVolumeKey() should have failed with error code '-22', but code was returned '%d' instead.", code))
+	}
+}
+
+func Test_ActivateByPassphrase(test *testing.T) {
+	device, err := Init(DevicePath)
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.Format(&LUKS1Params{}, &GenericParams{})
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.ActivateByPassphrase("testDeviceName", 0, "testPassphrase", CRYPT_ACTIVATE_READONLY)
+	if err != nil {
+		test.Error(err)
 	}
 }
