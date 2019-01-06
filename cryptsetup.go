@@ -143,3 +143,18 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 
 	return nil
 }
+
+// Deactivate deactivates a device.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_deactivate
+func (device *Device) Deactivate(deviceName string) error {
+	cDeviceName := C.CString(deviceName)
+	defer C.free(unsafe.Pointer(cDeviceName))
+
+	err := C.crypt_deactivate(device.cPointer(), cDeviceName)
+	if err < 0 {
+		return &Error{functionName: "crypt_deactivate", code: int(err)}
+	}
+
+	return nil
+}

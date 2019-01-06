@@ -122,7 +122,6 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	if err == nil {
 		test.Error("Init() did not return an error, when it should have.")
 	}
-
 	code := err.(*Error).Code()
 	if code != -15 {
 		test.Error(fmt.Sprintf("Init() should have failed with error code '-15', but code was returned '%d' instead.", code))
@@ -214,5 +213,26 @@ func Test_ActivateByPassphrase(test *testing.T) {
 	err = device.ActivateByPassphrase("testDeviceName", 0, "testPassphrase", CRYPT_ACTIVATE_READONLY)
 	if err != nil {
 		test.Error(err)
+	}
+
+	err = device.Deactivate("testDeviceName")
+	if err != nil {
+		test.Error(err)
+	}
+}
+
+func Test_Deactivate(test *testing.T) {
+	device, err := Init(DevicePath)
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.Deactivate("testDeviceName")
+	if err == nil {
+		test.Error("Deactivate() should have failed with error code '-19', but no error was returned.")
+	}
+	code := err.(*Error).Code()
+	if code != -19 {
+		test.Error(fmt.Sprintf("Deactivate() should have failed with error code '-19', but code was returned '%d' instead.", code))
 	}
 }
