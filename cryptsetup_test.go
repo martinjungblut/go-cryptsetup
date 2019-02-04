@@ -38,6 +38,11 @@ func teardown() {
 }
 
 func TestMain(m *testing.M) {
+	if (os.Getuid() != 0) {
+		fmt.Printf("This test suite requires root privileges, as libcrypsetup uses the kernel's device mapper.\n")
+		os.Exit(1)
+	}
+
 	setup()
 	result := m.Run()
 	teardown()
@@ -80,26 +85,6 @@ func Test_GenericParams_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
 	}
 }
 
-func Test_LUKS1Params_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
-	luksParams := LUKS1Params{}
-
-	luksParams.FillDefaultValues()
-
-	if luksParams.Hash != "sha256" {
-		test.Error("Default Hash should be 'sha256'.")
-	}
-}
-
-func Test_LUKS1Params_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
-	luksParams := LUKS1Params{Hash: "sha1"}
-
-	luksParams.FillDefaultValues()
-
-	if luksParams.Hash != "sha1" {
-		test.Error("Default Hash should be 'sha1'.")
-	}
-}
-
 func Test_Init_WorksIfDeviceIsFound(test *testing.T) {
 	device, err := Init(DevicePath)
 
@@ -125,6 +110,26 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	code := err.(*Error).Code()
 	if code != -15 {
 		test.Error(fmt.Sprintf("Init() should have failed with error code '-15', but code was returned '%d' instead.", code))
+	}
+}
+
+func Test_LUKS1Params_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
+	luksParams := LUKS1Params{}
+
+	luksParams.FillDefaultValues()
+
+	if luksParams.Hash != "sha256" {
+		test.Error("Default Hash should be 'sha256'.")
+	}
+}
+
+func Test_LUKS1Params_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
+	luksParams := LUKS1Params{Hash: "sha1"}
+
+	luksParams.FillDefaultValues()
+
+	if luksParams.Hash != "sha1" {
+		test.Error("Default Hash should be 'sha1'.")
 	}
 }
 
