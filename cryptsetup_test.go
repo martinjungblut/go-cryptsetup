@@ -199,6 +199,34 @@ func Test_AddPassphraseByVolumeKey(test *testing.T) {
 	}
 }
 
+func Test_AddPassphraseByPassphrase(test *testing.T) {
+	device, err := Init(DevicePath)
+	if err != nil {
+		test.Error(err)
+	}
+
+	_ = device.Format(&LUKS1Params{}, &GenericParams{})
+
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.AddPassphraseByPassphrase(1, "testPassphrase", "secondTestPassphrase")
+	if err != nil {
+		test.Error(err)
+	}
+
+	err = device.AddPassphraseByPassphrase(1, "testPassphrase", "secondTestPassphrase")
+	if err == nil {
+		test.Error("AddPassphraseByPassphrase() should have failed with error code '-22', but no error was returned.")
+	}
+	code := err.(*Error).Code()
+	if code != -22 {
+		test.Error(fmt.Sprintf("AddPassphraseByPassphrase() should have failed with error code '-22', but code was returned '%d' instead.", code))
+	}
+}
+
 func Test_ActivateByPassphrase(test *testing.T) {
 	device, err := Init(DevicePath)
 	if err != nil {

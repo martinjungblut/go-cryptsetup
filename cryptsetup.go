@@ -126,6 +126,28 @@ func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, pa
 	return nil
 }
 
+// AddPassphraseByPassphrase adds a passphrase to a keyslot, using a previously added passphrase to perform the required security check.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_keyslot_add_by_passphrase
+func (device *Device) AddPassphraseByPassphrase(keyslot int, currentPassphrase string, newPassphrase string) error {
+	cCurrentPassphrase := C.CString(currentPassphrase)
+	defer C.free(unsafe.Pointer(cCurrentPassphrase))
+
+	cNewPassphrase := C.CString(newPassphrase)
+	defer C.free(unsafe.Pointer(cNewPassphrase))
+
+	err := C.crypt_keyslot_add_by_passphrase(
+		device.cPointer(), C.int(keyslot),
+		cCurrentPassphrase, C.size_t(len(currentPassphrase)),
+		cNewPassphrase, C.size_t(len(newPassphrase)),
+	)
+	if err < 0 {
+		return &Error{functionName: "crypt_keyslot_add_by_passphrase", code: int(err)}
+	}
+
+	return nil
+}
+
 // ActivateByPassphrase activates a device by using a passphrase from a specific keyslot.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_activate_by_passphrase
