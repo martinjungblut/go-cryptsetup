@@ -30,7 +30,7 @@ func getFileMD5(filePath string, test *testing.T) string {
 }
 
 func setup() {
-	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=4M", "count=1").Run()
+	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=8M", "count=1").Run()
 }
 
 func teardown() {
@@ -38,7 +38,7 @@ func teardown() {
 }
 
 func TestMain(m *testing.M) {
-	if (os.Getuid() != 0) {
+	if os.Getuid() != 0 {
 		fmt.Printf("This test suite requires root privileges, as libcrypsetup uses the kernel's device mapper.\n")
 		os.Exit(1)
 	}

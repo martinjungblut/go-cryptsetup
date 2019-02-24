@@ -6,10 +6,7 @@ package cryptsetup
 #include <stdlib.h>
 */
 import "C"
-
-import (
-	"unsafe"
-)
+import "unsafe"
 
 const (
 	CRYPT_ANY_SLOT                        = C.CRYPT_ANY_SLOT
@@ -26,6 +23,12 @@ const (
 	CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS     = C.CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS
 )
 
+// Device is a handle to the crypto device.
+// It encapsulates libcryptsetup's 'crypt_device' struct.
+type Device struct {
+	cDevice *C.struct_crypt_device
+}
+
 // Init initializes a crypt device backed by 'devicePath'.
 // Returns a pointer to the newly allocated Device or any error encountered.
 // C equivalent: crypt_init
@@ -41,6 +44,16 @@ func Init(devicePath string) (*Device, error) {
 	}
 
 	return &Device{cDevice: cDevice}, nil
+}
+
+func (device *Device) cPointer() *C.struct_crypt_device {
+	return device.cDevice
+}
+
+// Type returns the device's type as a string.
+// Returns an empty string if the information is not available.
+func (device *Device) Type() string {
+	return C.GoString(C.crypt_get_type(device.cPointer()))
 }
 
 // Format formats a Device, using a type-specific TypeParams parameter and a type-agnostic GenericParams parameter.
