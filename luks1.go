@@ -1,9 +1,8 @@
 package cryptsetup
 
-/*
-#include <libcryptsetup.h>
-#include <stdlib.h>
-*/
+// #cgo pkg-config: libcryptsetup
+// #include <libcryptsetup.h>
+// #include <stdlib.h>
 import "C"
 import "unsafe"
 
