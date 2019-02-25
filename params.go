@@ -38,8 +38,3 @@ func (p *GenericParams) FillDefaultValues() {
 		p.VolumeKeySize = 256 / 8
 	}
 }
-
-// type LoopAESParams struct {
-// 	hash         string
-// 	offset, skip int
-// }

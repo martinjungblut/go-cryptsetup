@@ -27,6 +27,10 @@ type Device struct {
 	cDevice *C.struct_crypt_device
 }
 
+func (device *Device) cPointer() *C.struct_crypt_device {
+	return device.cDevice
+}
+
 // Init initializes a crypt device backed by 'devicePath'.
 // Returns a pointer to the newly allocated Device or any error encountered.
 // C equivalent: crypt_init
@@ -42,10 +46,6 @@ func Init(devicePath string) (*Device, error) {
 	}
 
 	return &Device{cDevice: cDevice}, nil
-}
-
-func (device *Device) cPointer() *C.struct_crypt_device {
-	return device.cDevice
 }
 
 // Type returns the device's type as a string.
