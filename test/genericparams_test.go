@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
+func Test_GenericParams_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
 	p := cryptsetup.GenericParams{}
 
 	p.FillDefaultValues()
@@ -23,7 +23,7 @@ func Test_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
 	}
 }
 
-func Test_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
+func Test_GenericParams_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
 	params := cryptsetup.GenericParams{Cipher: "twofish", CipherMode: "ecb", VolumeKeySize: 16}
 
 	params.FillDefaultValues()

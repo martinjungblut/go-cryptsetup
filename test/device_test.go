@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_Init_WorksIfDeviceIsFound(test *testing.T) {
+func Test_Device_Init_WorksIfDeviceIsFound(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 
 	if err != nil {
@@ -22,7 +22,7 @@ func Test_Init_WorksIfDeviceIsFound(test *testing.T) {
 	}
 }
 
-func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
+func Test_Device_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	_, err := cryptsetup.Init("nonExistingDevicePath")
 
 	if err == nil {
@@ -34,7 +34,7 @@ func Test_Init_FailsIfDeviceIsNotFound(test *testing.T) {
 	}
 }
 
-func Test_AddPassphraseByVolumeKey(test *testing.T) {
+func Test_Device_AddPassphraseByVolumeKey(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	if err != nil {
 		test.Error(err)
@@ -57,7 +57,7 @@ func Test_AddPassphraseByVolumeKey(test *testing.T) {
 	}
 }
 
-func Test_AddPassphraseByPassphrase(test *testing.T) {
+func Test_Device_AddPassphraseByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	if err != nil {
 		test.Error(err)
@@ -85,7 +85,7 @@ func Test_AddPassphraseByPassphrase(test *testing.T) {
 	}
 }
 
-func Test_ActivateByPassphrase(test *testing.T) {
+func Test_Device_ActivateByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	if err != nil {
 		test.Error(err)
@@ -112,7 +112,7 @@ func Test_ActivateByPassphrase(test *testing.T) {
 	}
 }
 
-func Test_Deactivate(test *testing.T) {
+func Test_Device_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	if err != nil {
 		test.Error(err)
