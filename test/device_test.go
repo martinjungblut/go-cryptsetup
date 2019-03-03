@@ -2,6 +2,7 @@ package test
 
 import (
 	"cryptsetup"
+	"cryptsetup/devicetypes"
 	"fmt"
 	"testing"
 )
@@ -12,10 +13,6 @@ func Test_Device_Init_WorksIfDeviceIsFound(test *testing.T) {
 	if err != nil {
 		test.Error(err)
 	}
-
-	// if device.cPointer() == nil {
-	// 	test.Error("cPointer() should not be nil.")
-	// }
 
 	if device.Type() != "" {
 		test.Error("Device should have no type.")
@@ -40,7 +37,7 @@ func Test_Device_AddPassphraseByVolumeKey(test *testing.T) {
 		test.Error(err)
 	}
 
-	_ = device.Format(&cryptsetup.LUKS1Params{}, &cryptsetup.GenericParams{})
+	_ = device.Format(&devicetypes.LUKS1Params{}, &cryptsetup.GenericParams{})
 
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
 	if err != nil {
@@ -63,7 +60,7 @@ func Test_Device_AddPassphraseByPassphrase(test *testing.T) {
 		test.Error(err)
 	}
 
-	_ = device.Format(&cryptsetup.LUKS1Params{}, &cryptsetup.GenericParams{})
+	_ = device.Format(&devicetypes.LUKS1Params{}, &cryptsetup.GenericParams{})
 
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
 	if err != nil {
@@ -91,7 +88,7 @@ func Test_Device_ActivateByPassphrase(test *testing.T) {
 		test.Error(err)
 	}
 
-	err = device.Format(&cryptsetup.LUKS1Params{}, &cryptsetup.GenericParams{})
+	err = device.Format(&devicetypes.LUKS1Params{}, &cryptsetup.GenericParams{})
 	if err != nil {
 		test.Error(err)
 	}

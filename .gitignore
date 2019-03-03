@@ -1,2 +1,4 @@
-*.test
-.vscode
+*
+!*.go
+!*.txt
+!*.md

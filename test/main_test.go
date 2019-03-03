@@ -10,6 +10,9 @@ import (
 	"testing"
 )
 
+const DevicePath string = "testDevice"
+const PassKey string = "testPassKey"
+
 func getFileMD5(filePath string, test *testing.T) string {
 	fileHandle, error := os.Open(filePath)
 	if error != nil {
@@ -25,9 +28,6 @@ func getFileMD5(filePath string, test *testing.T) string {
 
 	return hex.EncodeToString(hash.Sum(nil)[:16])
 }
-
-const DevicePath string = "testDevice"
-const PassKey string = "testPassKey"
 
 func setup() {
 	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=8M", "count=1").Run()

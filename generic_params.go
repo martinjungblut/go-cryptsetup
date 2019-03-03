@@ -1,17 +1,5 @@
 package cryptsetup
 
-// #cgo pkg-config: libcryptsetup
-// #include <libcryptsetup.h>
-import "C"
-import "unsafe"
-
-// TypeParams is the interface that all device type specific parameter types must implement.
-type TypeParams interface {
-	Type() string
-	FillDefaultValues()
-	Unmanaged() (unsafe.Pointer, func())
-}
-
 // GenericParams are device type independent parameters that are used to manipulate devices in various ways.
 type GenericParams struct {
 	Cipher        string
