@@ -42,14 +42,14 @@ func (device *Device) Type() string {
 	return C.GoString(C.crypt_get_type(device.cPointer()))
 }
 
-// Format formats a Device, using a type-specific TypeParams parameter and a type-agnostic GenericParams parameter.
+// Format formats a Device, using a specific device type, and type-independent parameters.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
-func (device *Device) Format(typeParams devicetypes.TypeParams, genericParams *GenericParams) error {
-	typeParams.FillDefaultValues()
+func (device *Device) Format(deviceType devicetypes.Interface, genericParams *GenericParams) error {
+	deviceType.FillDefaultValues()
 	genericParams.FillDefaultValues()
 
-	cType := C.CString(typeParams.Type())
+	cType := C.CString(deviceType.Type())
 	defer C.free(unsafe.Pointer(cType))
 
 	cCipher := C.CString(genericParams.Cipher)
@@ -76,7 +76,7 @@ func (device *Device) Format(typeParams devicetypes.TypeParams, genericParams *G
 
 	cVolumeKeySize := C.size_t(genericParams.VolumeKeySize)
 
-	cTypeParams, freeCTypeParams := typeParams.Unmanaged()
+	cTypeParams, freeCTypeParams := deviceType.Unmanaged()
 	defer freeCTypeParams()
 
 	err := C.crypt_format(device.cPointer(), cType, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
@@ -87,11 +87,12 @@ func (device *Device) Format(typeParams devicetypes.TypeParams, genericParams *G
 	return nil
 }
 
-// Load loads crypt device parameters from the on-disk header. A TypeParams parameter must be provided, indicating the device's type.
+// Load loads crypt device parameters from the on-disk header.
+// A specific device type parameter must be provided, indicating the device's type.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
-func (device *Device) Load(typeParams devicetypes.TypeParams) error {
-	cType := C.CString(typeParams.Type())
+func (device *Device) Load(deviceType devicetypes.Interface) error {
+	cType := C.CString(deviceType.Type())
 	defer C.free(unsafe.Pointer(cType))
 
 	err := C.crypt_load(device.cDevice, cType, nil)

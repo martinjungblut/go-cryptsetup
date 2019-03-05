@@ -6,22 +6,22 @@ import (
 	"testing"
 )
 
-func Test_LUKS1Params_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
-	luksParams := devicetypes.LUKS1Params{}
+func Test_LUKS1_FillDefaultValues_ShouldFillAllFields(test *testing.T) {
+	luks1 := devicetypes.LUKS1{}
 
-	luksParams.FillDefaultValues()
+	luks1.FillDefaultValues()
 
-	if luksParams.Hash != "sha256" {
+	if luks1.Hash != "sha256" {
 		test.Error("Default Hash should be 'sha256'.")
 	}
 }
 
-func Test_LUKS1Params_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
-	luksParams := devicetypes.LUKS1Params{Hash: "sha1"}
+func Test_LUKS1_FillDefaultValues_ShouldFillNoFields(test *testing.T) {
+	luks1 := devicetypes.LUKS1{Hash: "sha1"}
 
-	luksParams.FillDefaultValues()
+	luks1.FillDefaultValues()
 
-	if luksParams.Hash != "sha1" {
+	if luks1.Hash != "sha1" {
 		test.Error("Default Hash should be 'sha1'.")
 	}
 }
@@ -34,7 +34,7 @@ func Test_LUKS1_Format(test *testing.T) {
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
-	err = device.Format(&devicetypes.LUKS1Params{}, &cryptsetup.GenericParams{})
+	err = device.Format(&devicetypes.LUKS1{}, &cryptsetup.GenericParams{})
 	if err != nil {
 		test.Error(err)
 	}
@@ -56,10 +56,10 @@ func Test_LUKS1_Load(test *testing.T) {
 		test.Error(err)
 	}
 
-	luksParams := &devicetypes.LUKS1Params{}
-	_ = device.Format(luksParams, &cryptsetup.GenericParams{})
+	luks1 := &devicetypes.LUKS1{}
+	_ = device.Format(luks1, &cryptsetup.GenericParams{})
 
-	err = device.Load(luksParams)
+	err = device.Load(luks1)
 	if err != nil {
 		test.Error(err)
 	}
