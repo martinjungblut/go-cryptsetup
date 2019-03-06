@@ -14,7 +14,7 @@ type GenericParams struct {
 // CipherMode is set to "xts-plain64".
 // VolumeKeySize is set to 256 / 8.
 func DefaultGenericParams() *GenericParams {
-	params := GenericParams{}
+	params := new(GenericParams)
 
 	if params.Cipher == "" {
 		params.Cipher = "aes"
@@ -28,5 +28,5 @@ func DefaultGenericParams() *GenericParams {
 		params.VolumeKeySize = 256 / 8
 	}
 
-	return &params
+	return params
 }
