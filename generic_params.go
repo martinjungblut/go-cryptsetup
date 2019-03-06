@@ -9,20 +9,24 @@ type GenericParams struct {
 	VolumeKeySize int
 }
 
-// FillDefaultValues fills a GenericParams struct with useful default values.
+// DefaultGenericParams creates a new GenericParams struct with useful default values.
 // Cipher is set to "aes".
 // CipherMode is set to "xts-plain64".
 // VolumeKeySize is set to 256 / 8.
-func (p *GenericParams) FillDefaultValues() {
-	if p.Cipher == "" {
-		p.Cipher = "aes"
+func DefaultGenericParams() *GenericParams {
+	params := GenericParams{}
+
+	if params.Cipher == "" {
+		params.Cipher = "aes"
 	}
 
-	if p.CipherMode == "" {
-		p.CipherMode = "xts-plain64"
+	if params.CipherMode == "" {
+		params.CipherMode = "xts-plain64"
 	}
 
-	if p.VolumeKeySize == 0 {
-		p.VolumeKeySize = 256 / 8
+	if params.VolumeKeySize == 0 {
+		params.VolumeKeySize = 256 / 8
 	}
+
+	return &params
 }

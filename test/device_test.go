@@ -37,7 +37,7 @@ func Test_Device_AddPassphraseByVolumeKey(test *testing.T) {
 		test.Error(err)
 	}
 
-	_ = device.Format(&devicetypes.LUKS1{}, &cryptsetup.GenericParams{})
+	_ = device.Format(&devicetypes.LUKS1{}, cryptsetup.DefaultGenericParams())
 
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
 	if err != nil {
@@ -60,7 +60,7 @@ func Test_Device_AddPassphraseByPassphrase(test *testing.T) {
 		test.Error(err)
 	}
 
-	_ = device.Format(&devicetypes.LUKS1{}, &cryptsetup.GenericParams{})
+	_ = device.Format(&devicetypes.LUKS1{}, cryptsetup.DefaultGenericParams())
 
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
 	if err != nil {
@@ -88,7 +88,7 @@ func Test_Device_ActivateByPassphrase(test *testing.T) {
 		test.Error(err)
 	}
 
-	err = device.Format(&devicetypes.LUKS1{}, &cryptsetup.GenericParams{})
+	err = device.Format(&devicetypes.LUKS1{}, cryptsetup.DefaultGenericParams())
 	if err != nil {
 		test.Error(err)
 	}

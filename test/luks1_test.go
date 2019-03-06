@@ -34,7 +34,7 @@ func Test_LUKS1_Format(test *testing.T) {
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
-	err = device.Format(&devicetypes.LUKS1{}, &cryptsetup.GenericParams{})
+	err = device.Format(&devicetypes.LUKS1{}, cryptsetup.DefaultGenericParams())
 	if err != nil {
 		test.Error(err)
 	}
@@ -57,7 +57,7 @@ func Test_LUKS1_Load(test *testing.T) {
 	}
 
 	luks1 := &devicetypes.LUKS1{}
-	_ = device.Format(luks1, &cryptsetup.GenericParams{})
+	_ = device.Format(luks1, cryptsetup.DefaultGenericParams())
 
 	err = device.Load(luks1)
 	if err != nil {
