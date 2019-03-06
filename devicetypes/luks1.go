@@ -13,17 +13,19 @@ type LUKS1 struct {
 	DataDevice    string
 }
 
+// DefaultLUKS1 creates a new LUKS1 struct with fail-safe default values.
+// Hash is set to "sha256".
+func DefaultLUKS1() *LUKS1 {
+	luks1 := new(LUKS1)
+
+	luks1.Hash = "sha256"
+
+	return luks1
+}
+
 // Type returns the LUKS1 type as a string.
 func (luks1 LUKS1) Type() string {
 	return C.CRYPT_LUKS1
-}
-
-// FillDefaultValues fills a LUKS1 struct with fail-safe default values.
-// Hash is set to "sha256".
-func (luks1 *LUKS1) FillDefaultValues() {
-	if luks1.Hash == "" {
-		luks1.Hash = "sha256"
-	}
 }
 
 // Unmanaged is used to specialize LUKS1.

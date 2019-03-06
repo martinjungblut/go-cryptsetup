@@ -46,8 +46,6 @@ func (device *Device) Type() string {
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
 func (device *Device) Format(deviceType devicetypes.Interface, genericParams *GenericParams) error {
-	deviceType.FillDefaultValues()
-
 	cType := C.CString(deviceType.Type())
 	defer C.free(unsafe.Pointer(cType))
 
