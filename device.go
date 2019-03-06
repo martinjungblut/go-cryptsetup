@@ -15,10 +15,6 @@ type Device struct {
 	cDevice *C.struct_crypt_device
 }
 
-func (device *Device) cPointer() *C.struct_crypt_device {
-	return device.cDevice
-}
-
 // Init initializes a crypt device backed by 'devicePath'.
 // Returns a pointer to the newly allocated Device or any error encountered.
 // C equivalent: crypt_init
@@ -39,7 +35,7 @@ func Init(devicePath string) (*Device, error) {
 // Type returns the device's type as a string.
 // Returns an empty string if the information is not available.
 func (device *Device) Type() string {
-	return C.GoString(C.crypt_get_type(device.cPointer()))
+	return C.GoString(C.crypt_get_type(device.cDevice))
 }
 
 // Format formats a Device, using a specific device type, and type-independent parameters.
@@ -76,7 +72,7 @@ func (device *Device) Format(deviceType devicetypes.Interface, genericParams *Ge
 	cTypeParams, freeCTypeParams := deviceType.Unmanaged()
 	defer freeCTypeParams()
 
-	err := C.crypt_format(device.cPointer(), cType, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
+	err := C.crypt_format(device.cDevice, cType, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
 	if err < 0 {
 		return &Error{functionName: "crypt_format", code: int(err)}
 	}
@@ -115,7 +111,7 @@ func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, pa
 	cPassphrase := C.CString(passphrase)
 	defer C.free(unsafe.Pointer(cPassphrase))
 
-	err := C.crypt_keyslot_add_by_volume_key(device.cPointer(), C.int(keyslot), cVolumeKey, C.size_t(len(volumeKey)), cPassphrase, C.size_t(len(passphrase)))
+	err := C.crypt_keyslot_add_by_volume_key(device.cDevice, C.int(keyslot), cVolumeKey, C.size_t(len(volumeKey)), cPassphrase, C.size_t(len(passphrase)))
 	if err < 0 {
 		return &Error{functionName: "crypt_keyslot_add_by_volume_key", code: int(err)}
 	}
@@ -134,7 +130,7 @@ func (device *Device) AddPassphraseByPassphrase(keyslot int, currentPassphrase s
 	defer C.free(unsafe.Pointer(cNewPassphrase))
 
 	err := C.crypt_keyslot_add_by_passphrase(
-		device.cPointer(), C.int(keyslot),
+		device.cDevice, C.int(keyslot),
 		cCurrentPassphrase, C.size_t(len(currentPassphrase)),
 		cNewPassphrase, C.size_t(len(newPassphrase)),
 	)
@@ -155,7 +151,7 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 	cPassphrase := C.CString(passphrase)
 	defer C.free(unsafe.Pointer(cPassphrase))
 
-	err := C.crypt_activate_by_passphrase(device.cPointer(), cDeviceName, C.int(keyslot), cPassphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
+	err := C.crypt_activate_by_passphrase(device.cDevice, cDeviceName, C.int(keyslot), cPassphrase, C.size_t(len(passphrase)), C.uint32_t(flags))
 	if err < 0 {
 		return &Error{functionName: "crypt_activate_by_passphrase", code: int(err)}
 	}
@@ -170,7 +166,7 @@ func (device *Device) Deactivate(deviceName string) error {
 	cDeviceName := C.CString(deviceName)
 	defer C.free(unsafe.Pointer(cDeviceName))
 
-	err := C.crypt_deactivate(device.cPointer(), cDeviceName)
+	err := C.crypt_deactivate(device.cDevice, cDeviceName)
 	if err < 0 {
 		return &Error{functionName: "crypt_deactivate", code: int(err)}
 	}
