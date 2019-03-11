@@ -85,6 +85,10 @@ func (device *Device) Format(deviceType devicetypes.Interface, genericParams *Ge
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
 func (device *Device) Load(deviceType devicetypes.Interface) error {
+	if !deviceType.SupportsLoad() {
+		return &Error{unsupported: true}
+	}
+
 	cType := C.CString(deviceType.Type())
 	defer C.free(unsafe.Pointer(cType))
 

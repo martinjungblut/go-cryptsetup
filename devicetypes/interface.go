@@ -6,4 +6,5 @@ import "unsafe"
 type Interface interface {
 	Type() string
 	Unmanaged() (unsafe.Pointer, func())
+	SupportsLoad() bool
 }
