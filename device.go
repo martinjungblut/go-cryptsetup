@@ -13,6 +13,7 @@ import (
 // It encapsulates libcryptsetup's 'crypt_device' struct.
 type Device struct {
 	cDevice *C.struct_crypt_device
+	typeInterface devicetypes.Interface
 }
 
 // Init initializes a crypt device backed by 'devicePath'.
@@ -77,6 +78,7 @@ func (device *Device) Format(deviceType devicetypes.Interface, genericParams *Ge
 		return &Error{functionName: "crypt_format", code: int(err)}
 	}
 
+	device.typeInterface = deviceType
 	return nil
 }
 
@@ -85,7 +87,7 @@ func (device *Device) Format(deviceType devicetypes.Interface, genericParams *Ge
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
 func (device *Device) Load(deviceType devicetypes.Interface) error {
-	if !deviceType.SupportsLoad() {
+	if !deviceType.Supports().Load {
 		return &Error{unsupported: true}
 	}
 
@@ -104,6 +106,10 @@ func (device *Device) Load(deviceType devicetypes.Interface) error {
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_volume_key
 func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, passphrase string) error {
+	if device.typeInterface != nil && !device.typeInterface.Supports().AddPassphraseByVolumeKey {
+		return &Error{unsupported: true}
+	}
+
 	var cVolumeKey *C.char
 	if volumeKey == "" {
 		cVolumeKey = nil
@@ -127,6 +133,10 @@ func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, pa
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_passphrase
 func (device *Device) AddPassphraseByPassphrase(keyslot int, currentPassphrase string, newPassphrase string) error {
+	if device.typeInterface != nil && !device.typeInterface.Supports().AddPassphraseByPassphrase {
+		return &Error{unsupported: true}
+	}
+
 	cCurrentPassphrase := C.CString(currentPassphrase)
 	defer C.free(unsafe.Pointer(cCurrentPassphrase))
 

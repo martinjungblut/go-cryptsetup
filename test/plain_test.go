@@ -76,3 +76,29 @@ func Test_Plain_Load_Should_Not_Be_Supported(test *testing.T) {
 	err = device.Load(plain)
 	testWrapper.AssertUnsupportedError(err)
 }
+
+func Test_Plain_AddPassphraseByVolumeKey_Should_Not_Be_Supported(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	testWrapper.AssertNoError(err)
+
+	err = device.AddPassphraseByVolumeKey(0, "", "")
+	testWrapper.AssertUnsupportedError(err)
+}
+
+func Test_Plain_AddPassphraseByPassphrase_Should_Not_Be_Supported(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	testWrapper.AssertNoError(err)
+
+	err = device.AddPassphraseByPassphrase(0, "", "")
+	testWrapper.AssertUnsupportedError(err)
+}

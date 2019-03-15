@@ -57,6 +57,10 @@ func (luks1 LUKS1) Unmanaged() (unsafe.Pointer, func()) {
 	return unsafe.Pointer(&cParams), deallocate
 }
 
-func (luks1 LUKS1) SupportsLoad() bool {
-	return true
+func (luks1 LUKS1) Supports() supportedOperations {
+	return supportedOperations{
+		AddPassphraseByPassphrase: true,
+		AddPassphraseByVolumeKey: true,
+		Load: true,
+	}
 }
