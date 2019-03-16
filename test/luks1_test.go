@@ -15,17 +15,15 @@ func Test_LUKS1_DefaultLUKS1(test *testing.T) {
 }
 
 func Test_LUKS1_Format(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
 	device, err := cryptsetup.Init(DevicePath)
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
 	err = device.Format(devicetypes.DefaultLUKS1(), cryptsetup.DefaultGenericParams())
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	hashAfterFormat := getFileMD5(DevicePath, test)
 
@@ -39,39 +37,29 @@ func Test_LUKS1_Format(test *testing.T) {
 }
 
 func Test_LUKS1_ActivateByPassphrase_Deactivate(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
 	device, err := cryptsetup.Init(DevicePath)
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	err = device.Format(devicetypes.DefaultLUKS1(), cryptsetup.DefaultGenericParams())
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByPassphrase("testDeviceName", 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	err = device.Deactivate("testDeviceName")
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 }
 
 func Test_LUKS1_Load(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
-	if err != nil {
-		test.Error(err)
-	}
+	testWrapper.AssertNoError(err)
 
 	luks1 := devicetypes.DefaultLUKS1()
 	err = device.Format(luks1, cryptsetup.DefaultGenericParams())
