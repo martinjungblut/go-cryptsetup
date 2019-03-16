@@ -57,14 +57,15 @@ func Test_LUKS1_ActivateByPassphrase_Deactivate(test *testing.T) {
 
 func Test_LUKS1_Load(test *testing.T) {
 	testWrapper := TestWrapper{test}
+	luks1 := devicetypes.DefaultLUKS1()
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
-
-	luks1 := devicetypes.DefaultLUKS1()
 	err = device.Format(luks1, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
+	device, err = cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
 	err = device.Load(luks1)
 	testWrapper.AssertNoError(err)
 
