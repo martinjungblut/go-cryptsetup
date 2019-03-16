@@ -48,10 +48,10 @@ func Test_LUKS1_ActivateByPassphrase_Deactivate(test *testing.T) {
 	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertNoError(err)
 
-	err = device.ActivateByPassphrase("testDeviceName", 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
+	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 
-	err = device.Deactivate("testDeviceName")
+	err = device.Deactivate(DeviceName)
 	testWrapper.AssertNoError(err)
 }
 

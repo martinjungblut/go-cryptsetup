@@ -30,7 +30,40 @@ func Test_Device_Deactivate_Fails_If_Device_Is_Not_Active(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Deactivate("testDeviceName")
+	err = device.Deactivate(DeviceName)
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -19)
+}
+
+func Test_Device_ActivateByPassphrase_Fails_If_Device_Has_No_Type(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
+}
+
+func Test_Device_AddPassphraseByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
+}
+
+func Test_Device_AddPassphraseByPassphrase_Fails_If_Device_Has_No_Type(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.AddPassphraseByPassphrase(0, "testPassphrase", "secondTestPassphrase")
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
 }

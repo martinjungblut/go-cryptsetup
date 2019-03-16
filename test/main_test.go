@@ -13,6 +13,7 @@ import (
 )
 
 const DevicePath string = "testDevice"
+const DeviceName string = "testDeviceName"
 const PassKey string = "testPassKey"
 
 type TestWrapper struct {
