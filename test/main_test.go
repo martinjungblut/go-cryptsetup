@@ -21,7 +21,7 @@ type TestWrapper struct {
 
 func (testWrapper TestWrapper) AssertError(err error) {
 	if err == nil {
-		testWrapper.test.Error("Operation have failed, but didn't.")
+		testWrapper.test.Error("Operation should have failed, but didn't.")
 	}
 }
 

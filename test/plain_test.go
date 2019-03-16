@@ -56,7 +56,7 @@ func Test_Plain_ActivateByPassphrase_Deactivate(test *testing.T) {
 	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
-	err = device.ActivateByPassphrase(DevicePath, 0, PassKey, 0)
+	err = device.ActivateByPassphrase(DevicePath, 0, PassKey, cryptsetup.CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 
 	err = device.Deactivate(DevicePath)
