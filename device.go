@@ -99,6 +99,7 @@ func (device *Device) Load(deviceType devicetypes.Interface) error {
 		return &Error{functionName: "crypt_load", code: int(err)}
 	}
 
+	device.typeInterface = deviceType
 	return nil
 }
 

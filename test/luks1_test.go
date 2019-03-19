@@ -36,26 +36,7 @@ func Test_LUKS1_Format(test *testing.T) {
 	}
 }
 
-func Test_LUKS1_ActivateByPassphrase_Deactivate(test *testing.T) {
-	testWrapper := TestWrapper{test}
-
-	device, err := cryptsetup.Init(DevicePath)
-	testWrapper.AssertNoError(err)
-
-	err = device.Format(devicetypes.DefaultLUKS1(), cryptsetup.DefaultGenericParams())
-	testWrapper.AssertNoError(err)
-
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
-	testWrapper.AssertNoError(err)
-
-	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
-	testWrapper.AssertNoError(err)
-
-	err = device.Deactivate(DeviceName)
-	testWrapper.AssertNoError(err)
-}
-
-func Test_LUKS1_Load(test *testing.T) {
+func Test_LUKS1_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 	luks1 := devicetypes.DefaultLUKS1()
 
@@ -64,9 +45,18 @@ func Test_LUKS1_Load(test *testing.T) {
 	err = device.Format(luks1, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
+	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	testWrapper.AssertNoError(err)
+
 	device, err = cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 	err = device.Load(luks1)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", cryptsetup.CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+
+	err = device.Deactivate(DeviceName)
 	testWrapper.AssertNoError(err)
 
 	if device.Type() != "LUKS1" {
