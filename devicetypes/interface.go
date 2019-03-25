@@ -5,6 +5,7 @@ import "unsafe"
 type supportedOperations struct {
 	KeyslotAddByPassphrase bool
 	KeyslotAddByVolumeKey bool
+	KeyslotChangeByPassphrase bool
 	Load bool
 }
 

@@ -61,6 +61,7 @@ func (luks1 LUKS1) Supports() supportedOperations {
 	return supportedOperations{
 		KeyslotAddByPassphrase: true,
 		KeyslotAddByVolumeKey: true,
+		KeyslotChangeByPassphrase: true,
 		Load: true,
 	}
 }

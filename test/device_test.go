@@ -67,3 +67,14 @@ func Test_Device_KeyslotAddByPassphrase_Fails_If_Device_Has_No_Type(test *testin
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
+
+func Test_Device_KeyslotChangeByPassphrase_Fails_If_Device_Has_No_Type(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.KeyslotChangeByPassphrase(0, 0, "testPassphrase", "secondTestPassphrase")
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
+}

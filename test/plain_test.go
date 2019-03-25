@@ -102,3 +102,16 @@ func Test_Plain_KeyslotAddByPassphrase_Should_Not_Be_Supported(test *testing.T) 
 	err = device.KeyslotAddByPassphrase(0, "", "")
 	testWrapper.AssertUnsupportedError(err)
 }
+
+func Test_Plain_KeyslotChangeByPassphrase_Should_Not_Be_Supported(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	testWrapper.AssertNoError(err)
+
+	err = device.KeyslotChangeByPassphrase(0, 0, "", "")
+	testWrapper.AssertUnsupportedError(err)
+}
