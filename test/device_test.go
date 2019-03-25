@@ -46,24 +46,24 @@ func Test_Device_ActivateByPassphrase_Fails_If_Device_Has_No_Type(test *testing.
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
-func Test_Device_AddPassphraseByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T) {
+func Test_Device_KeyslotAddByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
-func Test_Device_AddPassphraseByPassphrase_Fails_If_Device_Has_No_Type(test *testing.T) {
+func Test_Device_KeyslotAddByPassphrase_Fails_If_Device_Has_No_Type(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByPassphrase(0, "testPassphrase", "secondTestPassphrase")
+	err = device.KeyslotAddByPassphrase(0, "testPassphrase", "secondTestPassphrase")
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }

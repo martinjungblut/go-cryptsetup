@@ -59,8 +59,8 @@ func (luks1 LUKS1) Unmanaged() (unsafe.Pointer, func()) {
 
 func (luks1 LUKS1) Supports() supportedOperations {
 	return supportedOperations{
-		AddPassphraseByPassphrase: true,
-		AddPassphraseByVolumeKey: true,
+		KeyslotAddByPassphrase: true,
+		KeyslotAddByVolumeKey: true,
 		Load: true,
 	}
 }

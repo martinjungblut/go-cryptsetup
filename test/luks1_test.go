@@ -45,7 +45,7 @@ func Test_LUKS1_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	err = device.Format(luks1, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertNoError(err)
 
 	device, err = cryptsetup.Init(DevicePath)
@@ -64,7 +64,7 @@ func Test_LUKS1_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	}
 }
 
-func Test_LUKS1_AddPassphraseByVolumeKey(test *testing.T) {
+func Test_LUKS1_KeyslotAddByVolumeKey(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
@@ -73,15 +73,15 @@ func Test_LUKS1_AddPassphraseByVolumeKey(test *testing.T) {
 	err = device.Format(devicetypes.DefaultLUKS1(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
-func Test_LUKS1_AddPassphraseByPassphrase(test *testing.T) {
+func Test_LUKS1_KeyslotAddByPassphrase(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
@@ -90,13 +90,13 @@ func Test_LUKS1_AddPassphraseByPassphrase(test *testing.T) {
 	err = device.Format(devicetypes.DefaultLUKS1(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByVolumeKey(0, "", "testPassphrase")
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByPassphrase(1, "testPassphrase", "secondTestPassphrase")
+	err = device.KeyslotAddByPassphrase(1, "testPassphrase", "secondTestPassphrase")
 	testWrapper.AssertNoError(err)
 
-	err = device.AddPassphraseByPassphrase(1, "testPassphrase", "secondTestPassphrase")
+	err = device.KeyslotAddByPassphrase(1, "testPassphrase", "secondTestPassphrase")
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }

@@ -103,11 +103,11 @@ func (device *Device) Load(deviceType devicetypes.Interface) error {
 	return nil
 }
 
-// AddPassphraseByVolumeKey adds a passphrase to a keyslot, using a volume key to perform the required security check.
+// KeyslotAddByVolumeKey adds a key slot using a volume key to perform the required security check.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_volume_key
-func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, passphrase string) error {
-	if device._type != nil && !device._type.Supports().AddPassphraseByVolumeKey {
+func (device *Device) KeyslotAddByVolumeKey(keyslot int, volumeKey string, passphrase string) error {
+	if device._type != nil && !device._type.Supports().KeyslotAddByVolumeKey {
 		return &Error{unsupported: true}
 	}
 
@@ -130,11 +130,11 @@ func (device *Device) AddPassphraseByVolumeKey(keyslot int, volumeKey string, pa
 	return nil
 }
 
-// AddPassphraseByPassphrase adds a passphrase to a keyslot, using a previously added passphrase to perform the required security check.
+// KeyslotAddByPassphrase adds a key slot using a previously added passphrase to perform the required security check.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_passphrase
-func (device *Device) AddPassphraseByPassphrase(keyslot int, currentPassphrase string, newPassphrase string) error {
-	if device._type != nil && !device._type.Supports().AddPassphraseByPassphrase {
+func (device *Device) KeyslotAddByPassphrase(keyslot int, currentPassphrase string, newPassphrase string) error {
+	if device._type != nil && !device._type.Supports().KeyslotAddByPassphrase {
 		return &Error{unsupported: true}
 	}
 

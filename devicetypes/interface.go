@@ -3,8 +3,8 @@ package devicetypes
 import "unsafe"
 
 type supportedOperations struct {
-	AddPassphraseByPassphrase bool
-	AddPassphraseByVolumeKey bool
+	KeyslotAddByPassphrase bool
+	KeyslotAddByVolumeKey bool
 	Load bool
 }
 

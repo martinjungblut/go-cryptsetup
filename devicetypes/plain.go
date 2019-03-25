@@ -51,8 +51,8 @@ func (plain Plain) Unmanaged() (unsafe.Pointer, func()) {
 
 func (plain Plain) Supports() supportedOperations {
 	return supportedOperations{
-		AddPassphraseByPassphrase: false,
-		AddPassphraseByVolumeKey: false,
+		KeyslotAddByPassphrase: false,
+		KeyslotAddByVolumeKey: false,
 		Load: false,
 	}
 }
