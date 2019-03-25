@@ -64,6 +64,33 @@ func Test_LUKS1_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	}
 }
 
+func Test_LUKS1_ActivateByVolumeKey_Deactivate(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	genericParams := cryptsetup.GenericParams{
+		Cipher: "aes",
+		CipherMode: "xts-plain64",
+		VolumeKey: generateKey(32, test),
+		VolumeKeySize: 32,
+	}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(devicetypes.DefaultLUKS1(), &genericParams)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+
+	err = device.Deactivate(DeviceName)
+	testWrapper.AssertNoError(err)
+
+	if device.Type() != "LUKS1" {
+		test.Error("Expected type: LUKS1.")
+	}
+}
+
 func Test_LUKS1_KeyslotAddByVolumeKey(test *testing.T) {
 	testWrapper := TestWrapper{test}
 

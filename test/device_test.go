@@ -46,6 +46,24 @@ func Test_Device_ActivateByPassphrase_Fails_If_Device_Has_No_Type(test *testing.
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
+func Test_Device_ActivateByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	genericParams := cryptsetup.GenericParams{
+		Cipher: "aes",
+		CipherMode: "xts-plain64",
+		VolumeKey: generateKey(32, test),
+		VolumeKeySize: 32,
+	}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
+}
+
 func Test_Device_KeyslotAddByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
