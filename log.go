@@ -7,17 +7,17 @@ package cryptsetup
 import "C"
 import "unsafe"
 
-var __log_callback func(level int, message string)
+var logCallback func(level int, message string)
 
 //export log_callback
 func log_callback(level C.int, message *C.char, usrptr unsafe.Pointer) {
-	if __log_callback != nil {
-		__log_callback(int(level), C.GoString(message))
+	if logCallback != nil {
+		logCallback(int(level), C.GoString(message))
 	}
 }
 
-func SetLogCallback(new_log_callback func(level int, message string)) {
-	__log_callback = new_log_callback
+func SetLogCallback(newLogCallback func(level int, message string)) {
+	logCallback = newLogCallback
 
 	C.crypt_set_log_callback(nil, (*[0]byte)(C.log_callback), nil)
 }
