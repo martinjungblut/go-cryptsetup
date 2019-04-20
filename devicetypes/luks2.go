@@ -3,12 +3,13 @@ package devicetypes
 // #cgo pkg-config: libcryptsetup
 // #include <libcryptsetup.h>
 // #include <stdlib.h>
+// #include <string.h>
 import "C"
 import "unsafe"
 
 // LUKS2 is the struct used to manipulate LUKS2 devices.
 type LUKS2 struct {
-	PBKDFType       PbkdfType
+	PBKDFType       *PbkdfType
 	Integrity       string
 	IntegrityParams IntegrityParams
 	DataAlignment   int
@@ -65,7 +66,7 @@ func (luks2 LUKS2) Type() string {
 
 // Unmanaged is used to specialize LUKS2.
 func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
-	deallocations := make([]func(), 0, 4)
+	deallocations := make([]func(), 0)
 	deallocate := func() {
 		for index := 0; index < len(deallocations); index++ {
 			deallocations[index]()
@@ -108,6 +109,38 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 		deallocations = append(deallocations, func() {
 			C.free(unsafe.Pointer(cParams.subsystem))
 		})
+	}
+
+	if luks2.PBKDFType != nil {
+		var cPBKDFType *C.struct_crypt_pbkdf_type
+		cPBKDFType = (*C.struct_crypt_pbkdf_type)(C.malloc(C.sizeof_struct_crypt_pbkdf_type))
+		deallocations = append(deallocations, func() {
+			C.free(unsafe.Pointer(cPBKDFType))
+		})
+
+		cPBKDFType._type = nil
+		if luks2.PBKDFType.Type != "" {
+		    cPBKDFType._type = C.CString(luks2.PBKDFType.Type)
+		    deallocations = append(deallocations, func() {
+		    	    C.free(unsafe.Pointer(cPBKDFType._type))
+		    })
+		}
+
+		cPBKDFType.hash = nil
+		if luks2.PBKDFType.Hash != "" {
+		    cPBKDFType.hash = C.CString(luks2.PBKDFType.Hash)
+		    deallocations = append(deallocations, func() {
+		    	    C.free(unsafe.Pointer(cPBKDFType.hash))
+		    })
+		}
+
+		cPBKDFType.time_ms = C.uint32_t(luks2.PBKDFType.TimeMs)
+		cPBKDFType.iterations = C.uint32_t(luks2.PBKDFType.Iterations)
+		cPBKDFType.max_memory_kb = C.uint32_t(luks2.PBKDFType.MaxMemoryKb)
+		cPBKDFType.parallel_threads = C.uint32_t(luks2.PBKDFType.ParallelThreads)
+		cPBKDFType.flags = C.uint32_t(luks2.PBKDFType.Flags)
+
+		cParams.pbkdf = cPBKDFType
 	}
 
 	return unsafe.Pointer(&cParams), deallocate

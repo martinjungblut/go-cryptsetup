@@ -14,7 +14,7 @@ func Test_LUKS2_DefaultLUKS2(test *testing.T) {
 	}
 }
 
-func Test_LUKS2_Format(test *testing.T) {
+func Test_LUKS2_Format_Using_DefaultLUKS2(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)
@@ -23,6 +23,42 @@ func Test_LUKS2_Format(test *testing.T) {
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
 	err = device.Format(devicetypes.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
+	testWrapper.AssertNoError(err)
+
+	hashAfterFormat := getFileMD5(DevicePath, test)
+
+	if hashBeforeFormat == hashAfterFormat {
+		test.Error("Unsuccessful call to Format() when using LUKS2 parameters.")
+	}
+
+	if device.Type() != "LUKS2" {
+		test.Error("Expected type: LUKS2.")
+	}
+}
+
+func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	pbkdftype := devicetypes.PbkdfType{
+		Type: "argon2id",
+		Hash: "sha512",
+		TimeMs: 20 * 1000,
+		Iterations: 2,
+		MaxMemoryKb: 16 * 1024,
+		ParallelThreads: 2,
+		Flags: 1,
+	}
+	luks2 := devicetypes.LUKS2{
+		SectorSize: 512,
+		PBKDFType: &pbkdftype,
+	}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	hashBeforeFormat := getFileMD5(DevicePath, test)
+
+	err = device.Format(luks2, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	hashAfterFormat := getFileMD5(DevicePath, test)
