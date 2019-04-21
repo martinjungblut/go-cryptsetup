@@ -7,10 +7,10 @@ import "C"
 import "unsafe"
 
 type Plain struct {
-	Hash string
-	Offset uint64
-	Skip uint64
-	Size uint64
+	Hash       string
+	Offset     uint64
+	Skip       uint64
+	Size       uint64
 	SectorSize uint32
 }
 
@@ -51,9 +51,9 @@ func (plain Plain) Unmanaged() (unsafe.Pointer, func()) {
 
 func (plain Plain) Supports() supportedOperations {
 	return supportedOperations{
-		KeyslotAddByPassphrase: false,
-		KeyslotAddByVolumeKey: false,
+		KeyslotAddByPassphrase:    false,
+		KeyslotAddByVolumeKey:     false,
 		KeyslotChangeByPassphrase: false,
-		Load: false,
+		Load:                      false,
 	}
 }

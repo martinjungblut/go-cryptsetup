@@ -5,15 +5,15 @@ package cryptsetup
 // #include <stdlib.h>
 import "C"
 import (
-    "cryptsetup/devicetypes"
-    "unsafe"
+	"cryptsetup/devicetypes"
+	"unsafe"
 )
 
 // Device is a handle to the crypto device.
 // It encapsulates libcryptsetup's 'crypt_device' struct.
 type Device struct {
 	_cDevice *C.struct_crypt_device
-	_type devicetypes.Interface
+	_type    devicetypes.Interface
 }
 
 // Init initializes a crypt device backed by 'devicePath'.

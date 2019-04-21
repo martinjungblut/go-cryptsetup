@@ -3,10 +3,10 @@ package devicetypes
 import "unsafe"
 
 type supportedOperations struct {
-	KeyslotAddByPassphrase bool
-	KeyslotAddByVolumeKey bool
+	KeyslotAddByPassphrase    bool
+	KeyslotAddByVolumeKey     bool
 	KeyslotChangeByPassphrase bool
-	Load bool
+	Load                      bool
 }
 
 // Interface that all device types must implement.

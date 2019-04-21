@@ -30,23 +30,23 @@ type PbkdfType struct {
 }
 
 type IntegrityParams struct {
-	JournalSize             uint64
-	JournalWatermark        uint
-	JournalCommitTime       uint
-	InterleaveSectors       uint32
-	TagSize                 uint32
-	SectorSize              uint32
-	BufferSectors           uint32
-	Integrity               string
-	IntegrityKeySize        uint32
+	JournalSize       uint64
+	JournalWatermark  uint
+	JournalCommitTime uint
+	InterleaveSectors uint32
+	TagSize           uint32
+	SectorSize        uint32
+	BufferSectors     uint32
+	Integrity         string
+	IntegrityKeySize  uint32
 
 	JournalIntegrity        string
 	JournalIntegrityKey     string
 	JournalIntegrityKeySize uint32
 
-	JournalCrypt            string
-	JournalCryptKey         string
-	JournalCryptKeySize     uint32
+	JournalCrypt        string
+	JournalCryptKey     string
+	JournalCryptKeySize uint32
 }
 
 // DefaultLUKS2 creates a new LUKS2 struct with fail-safe default values.
@@ -120,18 +120,18 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 		cPBKDFType._type = nil
 		if luks2.PBKDFType.Type != "" {
-		    cPBKDFType._type = C.CString(luks2.PBKDFType.Type)
-		    deallocations = append(deallocations, func() {
-		    	    C.free(unsafe.Pointer(cPBKDFType._type))
-		    })
+			cPBKDFType._type = C.CString(luks2.PBKDFType.Type)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cPBKDFType._type))
+			})
 		}
 
 		cPBKDFType.hash = nil
 		if luks2.PBKDFType.Hash != "" {
-		    cPBKDFType.hash = C.CString(luks2.PBKDFType.Hash)
-		    deallocations = append(deallocations, func() {
-		    	    C.free(unsafe.Pointer(cPBKDFType.hash))
-		    })
+			cPBKDFType.hash = C.CString(luks2.PBKDFType.Hash)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cPBKDFType.hash))
+			})
 		}
 
 		cPBKDFType.time_ms = C.uint32_t(luks2.PBKDFType.TimeMs)
@@ -148,9 +148,9 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 func (luks2 LUKS2) Supports() supportedOperations {
 	return supportedOperations{
-		KeyslotAddByPassphrase: true,
-		KeyslotAddByVolumeKey: true,
+		KeyslotAddByPassphrase:    true,
+		KeyslotAddByVolumeKey:     true,
 		KeyslotChangeByPassphrase: true,
-		Load: true,
+		Load:                      true,
 	}
 }
