@@ -40,17 +40,17 @@ func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	pbkdftype := devicetypes.PbkdfType{
-		Type: "argon2id",
-		Hash: "sha512",
-		TimeMs: 20 * 1000,
-		Iterations: 2,
-		MaxMemoryKb: 16 * 1024,
+		Type:            "argon2id",
+		Hash:            "sha512",
+		TimeMs:          20 * 1000,
+		Iterations:      2,
+		MaxMemoryKb:     16 * 1024,
 		ParallelThreads: 2,
-		Flags: 1,
+		Flags:           1,
 	}
 	luks2 := devicetypes.LUKS2{
 		SectorSize: 512,
-		PBKDFType: &pbkdftype,
+		PBKDFType:  &pbkdftype,
 	}
 
 	device, err := cryptsetup.Init(DevicePath)
@@ -70,6 +70,26 @@ func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 	if device.Type() != "LUKS2" {
 		test.Error("Expected type: LUKS2.")
 	}
+}
+
+func Test_LUKS2_Format_Using_IntegrityParams_Should_Fail_For_Invalid_Parameters(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	integrityParams := devicetypes.IntegrityParams{
+		JournalCrypt: "poly1305",
+	}
+	luks2 := devicetypes.LUKS2{
+		SectorSize:      512,
+		Integrity:       "poly1305",
+		IntegrityParams: &integrityParams,
+	}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(luks2, cryptsetup.DefaultGenericParams())
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -95)
 }
 
 func Test_LUKS2_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
@@ -104,9 +124,9 @@ func Test_LUKS2_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	genericParams := cryptsetup.GenericParams{
-		Cipher: "aes",
-		CipherMode: "xts-plain64",
-		VolumeKey: generateKey(32, test),
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKey:     generateKey(32, test),
 		VolumeKeySize: 32,
 	}
 

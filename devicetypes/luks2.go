@@ -11,7 +11,7 @@ import "unsafe"
 type LUKS2 struct {
 	PBKDFType       *PbkdfType
 	Integrity       string
-	IntegrityParams IntegrityParams
+	IntegrityParams *IntegrityParams
 	DataAlignment   int
 	DataDevice      string
 	SectorSize      uint32
@@ -141,6 +141,66 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 		cPBKDFType.flags = C.uint32_t(luks2.PBKDFType.Flags)
 
 		cParams.pbkdf = cPBKDFType
+	}
+
+	if luks2.IntegrityParams != nil {
+		var cIntegrityParams *C.struct_crypt_params_integrity
+		cIntegrityParams = (*C.struct_crypt_params_integrity)(C.malloc(C.sizeof_struct_crypt_params_integrity))
+		deallocations = append(deallocations, func() {
+			C.free(unsafe.Pointer(cIntegrityParams))
+		})
+
+		cIntegrityParams.journal_size = C.uint64_t(luks2.IntegrityParams.JournalSize)
+		cIntegrityParams.journal_watermark = C.uint(luks2.IntegrityParams.JournalWatermark)
+		cIntegrityParams.journal_commit_time = C.uint(luks2.IntegrityParams.JournalCommitTime)
+
+		cIntegrityParams.interleave_sectors = C.uint32_t(luks2.IntegrityParams.InterleaveSectors)
+		cIntegrityParams.tag_size = C.uint32_t(luks2.IntegrityParams.TagSize)
+		cIntegrityParams.sector_size = C.uint32_t(luks2.IntegrityParams.SectorSize)
+		cIntegrityParams.buffer_sectors = C.uint32_t(luks2.IntegrityParams.BufferSectors)
+
+		cIntegrityParams.integrity = nil
+		if luks2.IntegrityParams.Integrity != "" {
+			cIntegrityParams.integrity = C.CString(luks2.IntegrityParams.Integrity)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cIntegrityParams.integrity))
+			})
+		}
+		cIntegrityParams.integrity_key_size = C.uint32_t(luks2.IntegrityParams.IntegrityKeySize)
+
+		cIntegrityParams.journal_integrity = nil
+		if luks2.IntegrityParams.JournalIntegrity != "" {
+			cIntegrityParams.journal_integrity = C.CString(luks2.IntegrityParams.JournalIntegrity)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cIntegrityParams.journal_integrity))
+			})
+		}
+		cIntegrityParams.journal_integrity_key = nil
+		if luks2.IntegrityParams.JournalIntegrityKey != "" {
+			cIntegrityParams.journal_integrity_key = C.CString(luks2.IntegrityParams.JournalIntegrityKey)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cIntegrityParams.journal_integrity_key))
+			})
+		}
+		cIntegrityParams.journal_integrity_key_size = C.uint32_t(luks2.IntegrityParams.JournalIntegrityKeySize)
+
+		cIntegrityParams.journal_crypt = nil
+		if luks2.IntegrityParams.JournalCrypt != "" {
+			cIntegrityParams.journal_crypt = C.CString(luks2.IntegrityParams.JournalCrypt)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cIntegrityParams.journal_crypt))
+			})
+		}
+		cIntegrityParams.journal_crypt_key = nil
+		if luks2.IntegrityParams.JournalCryptKey != "" {
+			cIntegrityParams.journal_crypt_key = C.CString(luks2.IntegrityParams.JournalCryptKey)
+			deallocations = append(deallocations, func() {
+				C.free(unsafe.Pointer(cIntegrityParams.journal_crypt_key))
+			})
+		}
+		cIntegrityParams.journal_crypt_key_size = C.uint32_t(luks2.IntegrityParams.JournalCryptKeySize)
+
+		cParams.integrity_params = cIntegrityParams
 	}
 
 	return unsafe.Pointer(&cParams), deallocate
