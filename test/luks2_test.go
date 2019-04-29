@@ -36,6 +36,7 @@ func Test_LUKS2_Format_Using_DefaultLUKS2(test *testing.T) {
 	}
 }
 
+// TODO: add comparison to "default MD5", maybe using the test tables
 func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 	testWrapper := TestWrapper{test}
 

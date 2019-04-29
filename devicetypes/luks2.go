@@ -33,12 +33,14 @@ type IntegrityParams struct {
 	JournalSize       uint64
 	JournalWatermark  uint
 	JournalCommitTime uint
+
 	InterleaveSectors uint32
 	TagSize           uint32
 	SectorSize        uint32
 	BufferSectors     uint32
-	Integrity         string
-	IntegrityKeySize  uint32
+
+	Integrity        string
+	IntegrityKeySize uint32
 
 	JournalIntegrity        string
 	JournalIntegrityKey     string
@@ -111,12 +113,10 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 		})
 	}
 
+	cParams.pbkdf = nil
 	if luks2.PBKDFType != nil {
 		var cPBKDFType *C.struct_crypt_pbkdf_type
 		cPBKDFType = (*C.struct_crypt_pbkdf_type)(C.malloc(C.sizeof_struct_crypt_pbkdf_type))
-		deallocations = append(deallocations, func() {
-			C.free(unsafe.Pointer(cPBKDFType))
-		})
 
 		cPBKDFType._type = nil
 		if luks2.PBKDFType.Type != "" {
@@ -140,15 +140,17 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 		cPBKDFType.parallel_threads = C.uint32_t(luks2.PBKDFType.ParallelThreads)
 		cPBKDFType.flags = C.uint32_t(luks2.PBKDFType.Flags)
 
+		deallocations = append(deallocations, func() {
+			C.free(unsafe.Pointer(cPBKDFType))
+		})
+
 		cParams.pbkdf = cPBKDFType
 	}
 
+	cParams.integrity_params = nil
 	if luks2.IntegrityParams != nil {
 		var cIntegrityParams *C.struct_crypt_params_integrity
 		cIntegrityParams = (*C.struct_crypt_params_integrity)(C.malloc(C.sizeof_struct_crypt_params_integrity))
-		deallocations = append(deallocations, func() {
-			C.free(unsafe.Pointer(cIntegrityParams))
-		})
 
 		cIntegrityParams.journal_size = C.uint64_t(luks2.IntegrityParams.JournalSize)
 		cIntegrityParams.journal_watermark = C.uint(luks2.IntegrityParams.JournalWatermark)
@@ -199,6 +201,10 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 			})
 		}
 		cIntegrityParams.journal_crypt_key_size = C.uint32_t(luks2.IntegrityParams.JournalCryptKeySize)
+
+		deallocations = append(deallocations, func() {
+			C.free(unsafe.Pointer(cIntegrityParams))
+		})
 
 		cParams.integrity_params = cIntegrityParams
 	}
