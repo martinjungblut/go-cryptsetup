@@ -36,7 +36,6 @@ func Test_LUKS2_Format_Using_DefaultLUKS2(test *testing.T) {
 	}
 }
 
-// TODO: add comparison to "default MD5", maybe using the test tables
 func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
@@ -91,6 +90,41 @@ func Test_LUKS2_Format_Using_IntegrityParams_Should_Fail_For_Invalid_Parameters(
 	err = device.Format(luks2, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertError(err)
 	testWrapper.AssertErrorCodeEquals(err, -95)
+}
+
+func Test_LUKS2_Format_Using_IntegrityParams(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	integrityParams := devicetypes.IntegrityParams{
+		Integrity: "poly1305",
+	}
+	luks2 := devicetypes.LUKS2{
+		SectorSize:      4096,
+		IntegrityParams: &integrityParams,
+	}
+	genericParams := cryptsetup.GenericParams{
+		Cipher:        "chacha20",
+		CipherMode:    "random",
+		VolumeKeySize: 64,
+	}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	hashBeforeFormat := getFileMD5(DevicePath, test)
+
+	err = device.Format(luks2, &genericParams)
+	testWrapper.AssertNoError(err)
+
+	hashAfterFormat := getFileMD5(DevicePath, test)
+
+	if hashBeforeFormat == hashAfterFormat {
+		test.Error("Unsuccessful call to Format() when using LUKS2 parameters.")
+	}
+
+	if device.Type() != "LUKS2" {
+		test.Error("Expected type: LUKS2.")
+	}
 }
 
 func Test_LUKS2_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
