@@ -75,7 +75,7 @@ func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(cryptsetup.DefaultPlain(), &genericParams)
+	err = device.Format(cryptsetup.DefaultPlain(), genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)

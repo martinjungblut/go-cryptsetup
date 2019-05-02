@@ -112,7 +112,7 @@ func Test_LUKS2_Format_Using_IntegrityParams(test *testing.T) {
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
-	err = device.Format(luks2, &genericParams)
+	err = device.Format(luks2, genericParams)
 	testWrapper.AssertNoError(err)
 
 	hashAfterFormat := getFileMD5(DevicePath, test)
@@ -167,7 +167,7 @@ func Test_LUKS2_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(cryptsetup.DefaultLUKS2(), &genericParams)
+	err = device.Format(cryptsetup.DefaultLUKS2(), genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)

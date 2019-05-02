@@ -76,7 +76,7 @@ func Test_LUKS1_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(cryptsetup.DefaultLUKS1(), &genericParams)
+	err = device.Format(cryptsetup.DefaultLUKS1(), genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)

@@ -13,8 +13,8 @@ type GenericParams struct {
 // Cipher is set to "aes".
 // CipherMode is set to "xts-plain64".
 // VolumeKeySize is set to 256 / 8.
-func DefaultGenericParams() *GenericParams {
-	params := new(GenericParams)
+func DefaultGenericParams() GenericParams {
+	params := GenericParams{}
 
 	if params.Cipher == "" {
 		params.Cipher = "aes"

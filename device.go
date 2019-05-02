@@ -41,7 +41,7 @@ func (device *Device) Type() string {
 // Format formats a Device, using a specific device type, and type-independent parameters.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
-func (device *Device) Format(deviceType DeviceType, genericParams *GenericParams) error {
+func (device *Device) Format(deviceType DeviceType, genericParams GenericParams) error {
 	cDeviceTypeName := C.CString(deviceType.Name())
 	defer C.free(unsafe.Pointer(cDeviceTypeName))
 
