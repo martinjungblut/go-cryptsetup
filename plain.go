@@ -22,7 +22,8 @@ func DefaultPlain() *Plain {
 	return plain
 }
 
-func (plain Plain) Type() string {
+// Name returns the PLAIN device type name as a string.
+func (plain Plain) Name() string {
 	return "PLAIN"
 }
 

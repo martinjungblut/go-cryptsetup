@@ -61,8 +61,8 @@ func DefaultLUKS2() *LUKS2 {
 	return luks2
 }
 
-// Type returns the LUKS2 type as a string.
-func (luks2 LUKS2) Type() string {
+// Name returns the LUKS2 device type name as a string.
+func (luks2 LUKS2) Name() string {
 	return C.CRYPT_LUKS2
 }
 

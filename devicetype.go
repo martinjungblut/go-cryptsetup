@@ -11,7 +11,7 @@ type supportedOperations struct {
 
 // Interface that all device types must implement.
 type DeviceType interface {
-	Type() string
+	Name() string
 	Unmanaged() (unsafe.Pointer, func())
 	Supports() supportedOperations
 }

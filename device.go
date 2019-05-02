@@ -42,8 +42,8 @@ func (device *Device) Type() string {
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
 func (device *Device) Format(deviceType DeviceType, genericParams *GenericParams) error {
-	cType := C.CString(deviceType.Type())
-	defer C.free(unsafe.Pointer(cType))
+	cDeviceTypeName := C.CString(deviceType.Name())
+	defer C.free(unsafe.Pointer(cDeviceTypeName))
 
 	cCipher := C.CString(genericParams.Cipher)
 	defer C.free(unsafe.Pointer(cCipher))
@@ -72,7 +72,7 @@ func (device *Device) Format(deviceType DeviceType, genericParams *GenericParams
 	cTypeParams, freeCTypeParams := deviceType.Unmanaged()
 	defer freeCTypeParams()
 
-	err := C.crypt_format(device._cDevice, cType, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
+	err := C.crypt_format(device._cDevice, cDeviceTypeName, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
 	if err < 0 {
 		return &Error{functionName: "crypt_format", code: int(err)}
 	}
@@ -90,10 +90,10 @@ func (device *Device) Load(deviceType DeviceType) error {
 		return &Error{unsupported: true}
 	}
 
-	cType := C.CString(deviceType.Type())
-	defer C.free(unsafe.Pointer(cType))
+	cDeviceTypeName := C.CString(deviceType.Name())
+	defer C.free(unsafe.Pointer(cDeviceTypeName))
 
-	err := C.crypt_load(device._cDevice, cType, nil)
+	err := C.crypt_load(device._cDevice, cDeviceTypeName, nil)
 	if err < 0 {
 		return &Error{functionName: "crypt_load", code: int(err)}
 	}
