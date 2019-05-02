@@ -2,12 +2,11 @@ package test
 
 import (
 	"cryptsetup"
-	"cryptsetup/devicetypes"
 	"testing"
 )
 
 func Test_LUKS2_DefaultLUKS2(test *testing.T) {
-	luks2 := devicetypes.DefaultLUKS2()
+	luks2 := cryptsetup.DefaultLUKS2()
 
 	if luks2.SectorSize != 512 {
 		test.Error("Default sector size should be '512'.")
@@ -22,7 +21,7 @@ func Test_LUKS2_Format_Using_DefaultLUKS2(test *testing.T) {
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
-	err = device.Format(devicetypes.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	hashAfterFormat := getFileMD5(DevicePath, test)
@@ -39,7 +38,7 @@ func Test_LUKS2_Format_Using_DefaultLUKS2(test *testing.T) {
 func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
-	pbkdftype := devicetypes.PbkdfType{
+	pbkdftype := cryptsetup.PbkdfType{
 		Type:            "argon2id",
 		Hash:            "sha512",
 		TimeMs:          20 * 1000,
@@ -48,7 +47,7 @@ func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 		ParallelThreads: 2,
 		Flags:           1,
 	}
-	luks2 := devicetypes.LUKS2{
+	luks2 := cryptsetup.LUKS2{
 		SectorSize: 512,
 		PBKDFType:  &pbkdftype,
 	}
@@ -75,10 +74,10 @@ func Test_LUKS2_Format_Using_PbkdfType(test *testing.T) {
 func Test_LUKS2_Format_Using_IntegrityParams_Should_Fail_For_Invalid_Parameters(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
-	integrityParams := devicetypes.IntegrityParams{
+	integrityParams := cryptsetup.IntegrityParams{
 		JournalCrypt: "poly1305",
 	}
-	luks2 := devicetypes.LUKS2{
+	luks2 := cryptsetup.LUKS2{
 		SectorSize:      512,
 		Integrity:       "poly1305",
 		IntegrityParams: &integrityParams,
@@ -95,10 +94,10 @@ func Test_LUKS2_Format_Using_IntegrityParams_Should_Fail_For_Invalid_Parameters(
 func Test_LUKS2_Format_Using_IntegrityParams(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
-	integrityParams := devicetypes.IntegrityParams{
+	integrityParams := cryptsetup.IntegrityParams{
 		Integrity: "poly1305",
 	}
-	luks2 := devicetypes.LUKS2{
+	luks2 := cryptsetup.LUKS2{
 		SectorSize:      4096,
 		IntegrityParams: &integrityParams,
 	}
@@ -129,7 +128,7 @@ func Test_LUKS2_Format_Using_IntegrityParams(test *testing.T) {
 
 func Test_LUKS2_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
-	luks2 := devicetypes.DefaultLUKS2()
+	luks2 := cryptsetup.DefaultLUKS2()
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
@@ -168,7 +167,7 @@ func Test_LUKS2_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultLUKS2(), &genericParams)
+	err = device.Format(cryptsetup.DefaultLUKS2(), &genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -188,7 +187,7 @@ func Test_LUKS2_KeyslotAddByVolumeKey(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
@@ -205,7 +204,7 @@ func Test_LUKS2_KeyslotAddByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
@@ -225,7 +224,7 @@ func Test_LUKS2_KeyslotChangeByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultLUKS2(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")

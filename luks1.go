@@ -1,4 +1,4 @@
-package devicetypes
+package cryptsetup
 
 // #cgo pkg-config: libcryptsetup
 // #include <libcryptsetup.h>

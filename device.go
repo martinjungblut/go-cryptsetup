@@ -5,7 +5,6 @@ package cryptsetup
 // #include <stdlib.h>
 import "C"
 import (
-	"cryptsetup/devicetypes"
 	"unsafe"
 )
 
@@ -13,7 +12,7 @@ import (
 // It encapsulates libcryptsetup's 'crypt_device' struct.
 type Device struct {
 	_cDevice *C.struct_crypt_device
-	_type    devicetypes.Interface
+	_type    DeviceType
 }
 
 // Init initializes a crypt device backed by 'devicePath'.
@@ -42,7 +41,7 @@ func (device *Device) Type() string {
 // Format formats a Device, using a specific device type, and type-independent parameters.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_format
-func (device *Device) Format(deviceType devicetypes.Interface, genericParams *GenericParams) error {
+func (device *Device) Format(deviceType DeviceType, genericParams *GenericParams) error {
 	cType := C.CString(deviceType.Type())
 	defer C.free(unsafe.Pointer(cType))
 
@@ -86,7 +85,7 @@ func (device *Device) Format(deviceType devicetypes.Interface, genericParams *Ge
 // A specific device type parameter must be provided, indicating the device's type.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
-func (device *Device) Load(deviceType devicetypes.Interface) error {
+func (device *Device) Load(deviceType DeviceType) error {
 	if !deviceType.Supports().Load {
 		return &Error{unsupported: true}
 	}

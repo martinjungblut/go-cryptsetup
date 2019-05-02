@@ -1,4 +1,4 @@
-package devicetypes
+package cryptsetup
 
 import "unsafe"
 
@@ -10,7 +10,7 @@ type supportedOperations struct {
 }
 
 // Interface that all device types must implement.
-type Interface interface {
+type DeviceType interface {
 	Type() string
 	Unmanaged() (unsafe.Pointer, func())
 	Supports() supportedOperations

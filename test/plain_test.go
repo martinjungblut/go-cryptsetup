@@ -2,12 +2,11 @@ package test
 
 import (
 	"cryptsetup"
-	"cryptsetup/devicetypes"
 	"testing"
 )
 
 func Test_Plain_DefaultPlain(test *testing.T) {
-	plain := devicetypes.DefaultPlain()
+	plain := cryptsetup.DefaultPlain()
 
 	if plain.Hash != "sha256" {
 		test.Error("Default Hash should be 'sha256'.")
@@ -36,14 +35,14 @@ func Test_Plain_Format(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	if device.Type() != "PLAIN" {
 		test.Error("Expected type: PLAIN.")
 	}
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
@@ -53,7 +52,7 @@ func Test_Plain_ActivateByPassphrase_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByPassphrase(DevicePath, 0, PassKey, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -67,16 +66,16 @@ func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	genericParams := cryptsetup.GenericParams{
-		Cipher: "aes",
-		CipherMode: "xts-plain64",
-		VolumeKey: generateKey(32, test),
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKey:     generateKey(32, test),
 		VolumeKeySize: 32,
 	}
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), &genericParams)
+	err = device.Format(cryptsetup.DefaultPlain(), &genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -96,7 +95,7 @@ func Test_Plain_Load_Should_Not_Be_Supported(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	plain := devicetypes.DefaultPlain()
+	plain := cryptsetup.DefaultPlain()
 	err = device.Format(plain, cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
@@ -110,7 +109,7 @@ func Test_Plain_KeyslotAddByVolumeKey_Should_Not_Be_Supported(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "")
@@ -123,7 +122,7 @@ func Test_Plain_KeyslotAddByPassphrase_Should_Not_Be_Supported(test *testing.T) 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByPassphrase(0, "", "")
@@ -136,7 +135,7 @@ func Test_Plain_KeyslotChangeByPassphrase_Should_Not_Be_Supported(test *testing.
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(devicetypes.DefaultPlain(), cryptsetup.DefaultGenericParams())
+	err = device.Format(cryptsetup.DefaultPlain(), cryptsetup.DefaultGenericParams())
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotChangeByPassphrase(0, 0, "", "")

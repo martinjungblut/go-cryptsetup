@@ -50,9 +50,9 @@ func Test_Device_ActivateByVolumeKey_Fails_If_Device_Has_No_Type(test *testing.T
 	testWrapper := TestWrapper{test}
 
 	genericParams := cryptsetup.GenericParams{
-		Cipher: "aes",
-		CipherMode: "xts-plain64",
-		VolumeKey: generateKey(32, test),
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKey:     generateKey(32, test),
 		VolumeKeySize: 32,
 	}
 
