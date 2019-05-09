@@ -14,14 +14,6 @@ type Plain struct {
 	SectorSize uint32
 }
 
-func DefaultPlain() *Plain {
-	plain := new(Plain)
-
-	plain.Hash = "sha256"
-
-	return plain
-}
-
 // Name returns the PLAIN device type name as a string.
 func (plain Plain) Name() string {
 	return "PLAIN"

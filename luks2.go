@@ -51,16 +51,6 @@ type IntegrityParams struct {
 	JournalCryptKeySize uint32
 }
 
-// DefaultLUKS2 creates a new LUKS2 struct with fail-safe default values.
-// Hash is set to "sha256".
-func DefaultLUKS2() *LUKS2 {
-	luks2 := new(LUKS2)
-
-	luks2.SectorSize = 512
-
-	return luks2
-}
-
 // Name returns the LUKS2 device type name as a string.
 func (luks2 LUKS2) Name() string {
 	return C.CRYPT_LUKS2
