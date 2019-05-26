@@ -13,7 +13,7 @@ func Test_LUKS2_Format(test *testing.T) {
 
 	hashBeforeFormat := getFileMD5(DevicePath, test)
 
-	err = device.Format(&cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	hashAfterFormat := getFileMD5(DevicePath, test)
@@ -120,7 +120,7 @@ func Test_LUKS2_Format_Using_IntegrityParams(test *testing.T) {
 
 func Test_LUKS2_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
-	luks2 := &cryptsetup.LUKS2{SectorSize: 512}
+	luks2 := cryptsetup.LUKS2{SectorSize: 512}
 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
@@ -159,7 +159,7 @@ func Test_LUKS2_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.LUKS2{SectorSize: 512}, genericParams)
+	err = device.Format(cryptsetup.LUKS2{SectorSize: 512}, genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -179,7 +179,7 @@ func Test_LUKS2_KeyslotAddByVolumeKey(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
@@ -196,7 +196,7 @@ func Test_LUKS2_KeyslotAddByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
@@ -216,7 +216,7 @@ func Test_LUKS2_KeyslotChangeByPassphrase(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.LUKS2{SectorSize: 512}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")

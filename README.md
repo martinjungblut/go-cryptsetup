@@ -144,7 +144,7 @@ device, err := cryptsetup.Init(DevicePath)
 if err != nil {
 	// Init() error handling
 } else {
-	err = device.Format(&luks1Params, genericParams)
+	err = device.Format(luks1Params, genericParams)
 	if err != nil {
 		// Format() error handling
 	}

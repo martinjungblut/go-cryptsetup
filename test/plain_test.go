@@ -11,14 +11,14 @@ func Test_Plain_Format(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	if device.Type() != "PLAIN" {
 		test.Error("Expected type: PLAIN.")
 	}
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertErrorCodeEquals(err, -22)
 }
 
@@ -28,7 +28,7 @@ func Test_Plain_ActivateByPassphrase_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByPassphrase(DevicePath, 0, PassKey, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -51,7 +51,7 @@ func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, genericParams)
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, genericParams)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, cryptsetup.CRYPT_ACTIVATE_READONLY)
@@ -71,7 +71,7 @@ func Test_Plain_Load_Should_Not_Be_Supported(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	plain := &cryptsetup.Plain{Hash: "sha256"}
+	plain := cryptsetup.Plain{Hash: "sha256"}
 	err = device.Format(plain, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
@@ -85,7 +85,7 @@ func Test_Plain_KeyslotAddByVolumeKey_Should_Not_Be_Supported(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "")
@@ -98,7 +98,7 @@ func Test_Plain_KeyslotAddByPassphrase_Should_Not_Be_Supported(test *testing.T) 
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByPassphrase(0, "", "")
@@ -111,7 +111,7 @@ func Test_Plain_KeyslotChangeByPassphrase_Should_Not_Be_Supported(test *testing.
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	err = device.Format(&cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 256 / 8})
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotChangeByPassphrase(0, 0, "", "")
