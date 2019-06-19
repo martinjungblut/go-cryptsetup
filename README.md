@@ -133,20 +133,95 @@ Formatting a device will write to its device node, based on the chosen device ty
 **Example using LUKS1:**
 
 ```go
-luks1Params := cryptsetup.LUKS1{Hash: "sha256"}
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
 genericParams := cryptsetup.GenericParams{
 	Cipher: "aes",
 	CipherMode: "xts-plain64",
 	VolumeKeySize: 256 / 8
 }
 
-device, err := cryptsetup.Init(DevicePath)
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
 if err != nil {
 	// Init() error handling
 } else {
-	err = device.Format(luks1Params, genericParams)
+	err = device.Format(luks1, genericParams)
 	if err != nil {
 		// Format() error handling
+	}
+}
+```
+
+### 4. Loading devices
+
+After formatting a device, the next time you allocate an object referencing it, it will have to be loaded.
+Doing this is as simple as calling `Load()` providing the correct device type/operating mode.
+
+**Parameters:**
+
+- `DeviceType`: A valid implementation of the `DeviceType` interface, specifying the chosen device type and its parameters.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:**
+
+- LUKS1
+- LUKS2
+
+**Example using LUKS1:**
+
+```go
+// we assume this device node had already been formatted using LUKS1
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err != nil {
+	// Init() error handling
+} else {
+	err = device.Load(luks1)
+	if err != nil {
+		// Load() error handling
+	} else {
+		// device was loaded correctly and may be used
+	}
+}
+```
+
+### 5. Adding a keyslot by volume key
+
+For LUKS 1 or 2 devices, you might want to add a keyslot having a passphrase, by using the configured volume key.
+This is done by calling the `KeyslotAddByVolumeKey()` method.
+
+**Parameters:**
+
+- `int`: The keyslot to be added.
+- `string`: Volume key. Must match the volume key that was used to format the device.
+- `string`: Passphrase to be added to the keyslot.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:**
+
+- LUKS1
+- LUKS2
+
+**Example using LUKS1:**
+
+```go
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKeySize: 256 / 8
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+		device.KeyslotAddByVolumeKey(0, "", "hypothetical-passphrase")
 	}
 }
 ```
