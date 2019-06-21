@@ -180,10 +180,10 @@ if err != nil {
 	// Init() error handling
 } else {
 	err = device.Load(luks1)
-	if err != nil {
-		// Load() error handling
-	} else {
+	if err == nil {
 		// device was loaded correctly and may be used
+	} else {
+		// Load() error handling
 	}
 }
 ```
@@ -211,17 +211,107 @@ This is done by calling the `KeyslotAddByVolumeKey()` method.
 **Example using LUKS1:**
 
 ```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
 luks1 := cryptsetup.LUKS1{Hash: "sha256"}
 genericParams := cryptsetup.GenericParams{
 	Cipher: "aes",
 	CipherMode: "xts-plain64",
-	VolumeKeySize: 256 / 8
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
 }
 
 device, err := cryptsetup.Init("/dev/hypothetical-device-node")
 if err == nil {
 	if device.Format(luks1, genericParams) == nil {
-		device.KeyslotAddByVolumeKey(0, "", "hypothetical-passphrase")
+		device.KeyslotAddByVolumeKey(0, volumeKey, "hypothetical-passphrase")
+	}
+}
+```
+
+### 6. Adding a keyslot by passphrase
+
+After a keyslot has been added, it's possible to use its passphrase to add subsequent keyslots.
+This is done by calling the `KeyslotAddByPassphrase()` method.
+
+**Parameters:**
+
+- `int`: The keyslot to be added.
+- `string`: A passphrase that already exists in a keyslot on this device.
+- `string`: Passphrase to be added to the keyslot.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:**
+
+- LUKS1
+- LUKS2
+
+**Example using LUKS1:**
+
+```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+		if device.KeyslotAddByVolumeKey(0, volumeKey, "first-passphrase") == nil {
+			device.KeyslotAddByPassphrase(1, "first-passphrase", "second-passphrase")
+		}
+	}
+}
+```
+
+### 7. Changing a keyslot by passphrase
+
+It's also possible to update a keyslot by using a valid passphrase.
+This is done by calling the `KeyslotChangeByPassphrase()` method.
+
+**Parameters:**
+
+- `int`: Current keyslot, must already exist. Will be replaced with the new one.
+- `int`: New keyslot.
+- `string`: Current passphrase, must be valid. Will be replaced by the new one.
+- `string`: New passphrase.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:**
+
+- LUKS1
+- LUKS2
+
+**Example using LUKS1:**
+
+```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+		if device.KeyslotAddByVolumeKey(0, volumeKey, "passphrase") == nil {
+			device.KeyslotChangeByPassphrase(0, 0, "passphrase", "new-passphrase")
+		}
 	}
 }
 ```
