@@ -158,7 +158,7 @@ func (device *Device) KeyslotAddByPassphrase(keyslot int, currentPassphrase stri
 // KeyslotChangeByPassphrase changes a defined a key slot using a previously added passphrase to perform the required security check.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_change_by_passphrase
-func (device *Device) KeyslotChangeByPassphrase(oldKeyslot int, newKeyslot int, currentPassphrase string, newPassphrase string) error {
+func (device *Device) KeyslotChangeByPassphrase(currentKeyslot int, newKeyslot int, currentPassphrase string, newPassphrase string) error {
 	if device._type != nil && !device._type.Supports().KeyslotChangeByPassphrase {
 		return &Error{unsupported: true}
 	}
@@ -171,7 +171,7 @@ func (device *Device) KeyslotChangeByPassphrase(oldKeyslot int, newKeyslot int, 
 
 	err := C.crypt_keyslot_change_by_passphrase(
 		device._cDevice,
-		C.int(oldKeyslot),
+		C.int(currentKeyslot),
 		C.int(newKeyslot),
 		cCurrentPassphrase, C.size_t(len(currentPassphrase)),
 		cNewPassphrase, C.size_t(len(newPassphrase)),
