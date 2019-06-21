@@ -82,9 +82,9 @@ cryptsetup.SetLogCallback(func(level int, message string) {
 })
 ```
 
-### 2. Initialising devices
+### 2. Initializing devices
 
-Initialising a device is the process of acquiring a reference to a particular device node for it to be manipulated.
+Initializing a device is the process of acquiring a reference to a particular device node for it to be manipulated.
 
 Devices may be initialised using the `cryptsetup.Init()` function.
 
@@ -103,16 +103,17 @@ Devices may be initialised using the `cryptsetup.Init()` function.
 
 ```go
 device, err := cryptsetup.Init("path-to-device-node")
-if err != nil {
-	// error handling
-} else {
+if err == nil {
 	// device was successfully initialised
+} else {
+	// error handling
 }
 ```
 
 ### 3. Formatting devices
 
 After a device has been initialised, it's possible to `Format()` it.
+
 Formatting a device will write to its device node, based on the chosen device type/operating mode.
 
 **Parameters:**
@@ -141,19 +142,22 @@ genericParams := cryptsetup.GenericParams{
 }
 
 device, err := cryptsetup.Init("/dev/hypothetical-device-node")
-if err != nil {
-	// Init() error handling
-} else {
+if err == nil {
 	err = device.Format(luks1, genericParams)
-	if err != nil {
+	if err == nil {
+		// success: device was formatted correctly and may be used
+	} else {
 		// Format() error handling
 	}
+} else {
+	// Init() error handling
 }
 ```
 
 ### 4. Loading devices
 
 After formatting a device, the next time you allocate an object referencing it, it will have to be loaded.
+
 Doing this is as simple as calling `Load()` providing the correct device type/operating mode.
 
 **Parameters:**
@@ -176,21 +180,22 @@ Doing this is as simple as calling `Load()` providing the correct device type/op
 luks1 := cryptsetup.LUKS1{Hash: "sha256"}
 
 device, err := cryptsetup.Init("/dev/hypothetical-device-node")
-if err != nil {
-	// Init() error handling
-} else {
+if err == nil {
 	err = device.Load(luks1)
 	if err == nil {
-		// device was loaded correctly and may be used
+		// success: device was loaded correctly and may be used
 	} else {
 		// Load() error handling
 	}
+} else {
+	// Init() error handling
 }
 ```
 
 ### 5. Adding a keyslot by volume key
 
 For LUKS 1 or 2 devices, you might want to add a keyslot having a passphrase, by using the configured volume key.
+
 This is done by calling the `KeyslotAddByVolumeKey()` method.
 
 **Parameters:**
@@ -232,6 +237,7 @@ if err == nil {
 ### 6. Adding a keyslot by passphrase
 
 After a keyslot has been added, it's possible to use its passphrase to add subsequent keyslots.
+
 This is done by calling the `KeyslotAddByPassphrase()` method.
 
 **Parameters:**
@@ -275,6 +281,7 @@ if err == nil {
 ### 7. Changing a keyslot by passphrase
 
 It's also possible to update a keyslot by using a valid passphrase.
+
 This is done by calling the `KeyslotChangeByPassphrase()` method.
 
 **Parameters:**
@@ -311,6 +318,123 @@ if err == nil {
 	if device.Format(luks1, genericParams) == nil {
 		if device.KeyslotAddByVolumeKey(0, volumeKey, "passphrase") == nil {
 			device.KeyslotChangeByPassphrase(0, 0, "passphrase", "new-passphrase")
+		}
+	}
+}
+```
+
+### 8. Activating devices using the volume key
+
+The volume key may be used to activate the device, by using the `ActivateByVolumeKey()` method.
+
+**Parameters:**
+
+- `string`: A name for the device to be activated with. This will be the name of the new device node in `/dev/mapper`.
+- `string`: The volume key to be used to activate the device.
+- `int`: The volume key's length.
+- `int`: Activation flags. Check `const.go` for more information.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:** All
+
+**Example using LUKS1:**
+
+```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+	    device.ActivateByVolumeKey("hypothetical-device", volumeKey, 24, 0)
+	}
+}
+```
+
+### 9. Activating devices using a passphrase
+
+A valid passphrase may be used to activate the device, by using the `ActivateByPassphrase()` method.
+
+**Parameters:**
+
+- `string`: A name for the device to be activated with. This will be the name of the new device node in `/dev/mapper`.
+- `int`: Keyslot having the passphrase that will be used for activation.
+- `string`: Passphrase to activate the device. Must be valid for the specified keyslot.
+- `int`: Activation flags. Check `const.go` for more information.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:** All
+
+**Example using LUKS1:**
+
+```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+		if device.KeyslotAddByVolumeKey(0, volumeKey, "passphrase") == nil {
+			device.ActivateByPassphrase("hypothetical-device", 0, "passphrase", 0)
+		}
+	}
+}
+```
+
+### 10. Deactivating devices
+
+Deactivating a device is done by calling the `Deactivate()` method.
+
+**Parameters:**
+
+- `string`: The name the device was given when it was activated. This corresponds to its device node name in `/dev/mapper`.
+
+**Return values:**
+
+- `nil` on success, or an `error` on failure.
+
+**Supported operating modes:** All
+
+**Example using LUKS1:**
+
+```go
+volumeKey := "ueT9TEhL7SM5mqcBY3kayutS" // 24-byte key
+
+luks1 := cryptsetup.LUKS1{Hash: "sha256"}
+genericParams := cryptsetup.GenericParams{
+	Cipher: "aes",
+	CipherMode: "xts-plain64",
+	VolumeKey: volumeKey,
+	VolumeKeySize: 24,
+}
+
+device, err := cryptsetup.Init("/dev/hypothetical-device-node")
+if err == nil {
+	if device.Format(luks1, genericParams) == nil {
+		if device.KeyslotAddByVolumeKey(0, volumeKey, "passphrase") == nil {
+			if device.ActivateByPassphrase("hypothetical-device", 0, "passphrase", 0) == nil {
+				device.Deactivate("hypothetical-device")
+			}
 		}
 	}
 }
