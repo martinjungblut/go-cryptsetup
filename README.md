@@ -4,7 +4,8 @@
 1. [Rationale](#rationale)
 2. [Compatibility](#compatibility)
 3. [Installation](#installation)
-4. [API reference](#api-reference)
+4. [Currently supported device types/operating modes](#supported-modes)
+5. [API reference](#api-reference)
 	1. [Configuring logging](#configuring-logging)
 	2. [Initializing devices](#initializing-devices)
 	3. [Formatting devices](#formatting-devices)
@@ -63,9 +64,7 @@ You might want to unmask it, and then:
 `# emerge sys-fs/cryptsetup`
 
 
-## API reference <a name="api-reference"></a>
-
-Everything is available under the `cryptsetup` module.
+## Currently supported device types/operating modes <a name="supported-modes"></a>
 
 Cryptsetup supports different encryption operating modes to use with _dm-crypt_.
 Some operations are only supported for some operating modes.
@@ -77,6 +76,12 @@ The following modes are currently supported by `go-cryptsetup`:
 - LUKS2
 
 Notice that support for the remaining operating modes is planned.
+
+
+## API reference <a name="api-reference"></a>
+
+Everything is available under the `cryptsetup` module.
+
 
 ### 1. Configuring logging <a name="configuring-logging"></a>
 
@@ -448,10 +453,8 @@ genericParams := cryptsetup.GenericParams{
 device, err := cryptsetup.Init("/dev/hypothetical-device-node")
 if err == nil {
 	if device.Format(luks1, genericParams) == nil {
-		if device.KeyslotAddByVolumeKey(0, volumeKey, "passphrase") == nil {
-			if device.ActivateByPassphrase("hypothetical-device", 0, "passphrase", 0) == nil {
-				device.Deactivate("hypothetical-device")
-			}
+		if device.ActivateByVolumeKey("hypothetical-device", volumeKey, 24, 0) == nil {
+			device.Deactivate("hypothetical-device")
 		}
 	}
 }
