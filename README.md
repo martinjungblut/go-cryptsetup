@@ -1,6 +1,23 @@
 # Go bindings for libcryptsetup
 
-## Rationale
+## Table of contents
+1. [Rationale](#rationale)
+2. [Compatibility](#compatibility)
+3. [Installation](#installation)
+4. [API reference](#api-reference)
+	1. [Configuring logging](#configuring-logging)
+	2. [Initializing devices](#initializing-devices)
+	3. [Formatting devices](#formatting-devices)
+	4. [Loading devices](#loading-devices)
+	5. [Adding a keyslot by volume key](#adding-keyslot-volume-key)
+	6. [Adding a keyslot by passphrase](#adding-keyslot-passphrase)
+	7. [Changing a keyslot by passphrase](#changing-keyslot-passphrase)
+	8. [Activating devices using the volume key](#activating-devices-volume-key)
+	9. [Activating devices using a passphrase](#activating-devices-passphrase)
+	10. [Deactivating devices](#deactivating-devices)
+
+
+## Rationale <a name="rationale"></a>
 A number of projects have been using Go's `os/exec` package to interface with the upstream [cryptsetup](https://gitlab.com/cryptsetup/cryptsetup "cryptsetup upstream repository") tools.
 
 Doing so poses some technical issues:
@@ -15,12 +32,12 @@ Doing so poses some technical issues:
 This project is a _pure Go interface for libcryptsetup_, providing a clean and polymorphic API that is both correct and easy to work with.
 
 
-## Compatibility
+## Compatibility <a name="compatibility"></a>
 
 These bindings have been tested using libcryptsetup >= 2.0.
 
 
-## Installation
+## Installation <a name="installation"></a>
 
 Run the following command to install the bindings:
 
@@ -46,7 +63,7 @@ You might want to unmask it, and then:
 `# emerge sys-fs/cryptsetup`
 
 
-## API reference
+## API reference <a name="api-reference"></a>
 
 Everything is available under the `cryptsetup` module.
 
@@ -61,7 +78,7 @@ The following modes are currently supported by `go-cryptsetup`:
 
 Notice that support for the remaining operating modes is planned.
 
-### 1. Configuring logging
+### 1. Configuring logging <a name="configuring-logging"></a>
 
 Cryptsetup's logging mechanism is incredibly useful when trying to use its library directly.
 Thanks to Go's ABI compatibility with C, it's possible to specify a logging callback directly from Go.
@@ -82,7 +99,7 @@ cryptsetup.SetLogCallback(func(level int, message string) {
 })
 ```
 
-### 2. Initializing devices
+### 2. Initializing devices <a name="initializing-devices"></a>
 
 Initializing a device is the process of acquiring a reference to a particular device node for it to be manipulated.
 
@@ -110,7 +127,7 @@ if err == nil {
 }
 ```
 
-### 3. Formatting devices
+### 3. Formatting devices <a name="formatting-devices"></a>
 
 After a device has been initialised, it's possible to `Format()` it.
 
@@ -154,7 +171,7 @@ if err == nil {
 }
 ```
 
-### 4. Loading devices
+### 4. Loading devices <a name="loading-devices"></a>
 
 After formatting a device, the next time you allocate an object referencing it, it will have to be loaded.
 
@@ -192,7 +209,7 @@ if err == nil {
 }
 ```
 
-### 5. Adding a keyslot by volume key
+### 5. Adding a keyslot by volume key <a name="adding-keyslot-volume-key"></a>
 
 For LUKS 1 or 2 devices, you might want to add a keyslot having a passphrase, by using the configured volume key.
 
@@ -234,7 +251,7 @@ if err == nil {
 }
 ```
 
-### 6. Adding a keyslot by passphrase
+### 6. Adding a keyslot by passphrase <a name="adding-keyslot-passphrase"></a>
 
 After a keyslot has been added, it's possible to use its passphrase to add subsequent keyslots.
 
@@ -278,7 +295,7 @@ if err == nil {
 }
 ```
 
-### 7. Changing a keyslot by passphrase
+### 7. Changing a keyslot by passphrase <a name="changing-keyslot-passphrase"></a>
 
 It's also possible to update a keyslot by using a valid passphrase.
 
@@ -323,7 +340,7 @@ if err == nil {
 }
 ```
 
-### 8. Activating devices using the volume key
+### 8. Activating devices using the volume key <a name="activating-devices-volume-key"></a>
 
 The volume key may be used to activate the device, by using the `ActivateByVolumeKey()` method.
 
@@ -361,7 +378,7 @@ if err == nil {
 }
 ```
 
-### 9. Activating devices using a passphrase
+### 9. Activating devices using a passphrase <a name="activating-devices-passphrase"></a>
 
 A valid passphrase may be used to activate the device, by using the `ActivateByPassphrase()` method.
 
@@ -401,7 +418,7 @@ if err == nil {
 }
 ```
 
-### 10. Deactivating devices
+### 10. Deactivating devices <a name="deactivating-devices"></a>
 
 Deactivating a device is done by calling the `Deactivate()` method.
 
