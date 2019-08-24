@@ -8,3 +8,5 @@
 !**.md
 !**.c
 !**.h
+
+!.travis.yml
