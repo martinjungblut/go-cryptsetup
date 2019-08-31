@@ -1,9 +1,12 @@
 package cryptsetup
 
-// #cgo pkg-config: libcryptsetup
-// #include <libcryptsetup.h>
-// #include <stdlib.h>
-// #include "log.h"
+/*
+#cgo pkg-config: libcryptsetup
+#include <libcryptsetup.h>
+#include <stdlib.h>
+
+extern void log_callback(int level, char * message, void * usrptr);
+*/
 import "C"
 import "unsafe"
 
