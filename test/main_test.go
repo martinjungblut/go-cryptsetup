@@ -76,7 +76,7 @@ func generateKey(length int, test *testing.T) string {
 }
 
 func setup() {
-	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=8M", "count=1").Run()
+	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=64M", "count=1").Run()
 }
 
 func teardown() {
