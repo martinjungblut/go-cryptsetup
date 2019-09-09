@@ -32,6 +32,14 @@ func Init(devicePath string) (*Device, error) {
 	return &Device{_cDevice: cDevice}, nil
 }
 
+// Free releases crypt device context and used memory.
+// C equivalent: crypt_free
+func (device *Device) Free() {
+	if device._cDevice != nil {
+		C.crypt_free(device._cDevice)
+	}
+}
+
 // Type returns the device's type as a string.
 // Returns an empty string if the information is not available.
 func (device *Device) Type() string {
@@ -51,18 +59,14 @@ func (device *Device) Format(deviceType DeviceType, genericParams GenericParams)
 	cCipherMode := C.CString(genericParams.CipherMode)
 	defer C.free(unsafe.Pointer(cCipherMode))
 
-	var cUUID *C.char
-	if genericParams.UUID == "" {
-		cUUID = nil
-	} else {
+	var cUUID *C.char = nil
+	if len(genericParams.UUID) > 0 {
 		cUUID = C.CString(genericParams.UUID)
 		defer C.free(unsafe.Pointer(cUUID))
 	}
 
-	var cVolumeKey *C.char
-	if genericParams.VolumeKey == "" {
-		cVolumeKey = nil
-	} else {
+	var cVolumeKey *C.char = nil
+	if len(genericParams.VolumeKey) > 0 {
 		cVolumeKey = C.CString(genericParams.VolumeKey)
 		defer C.free(unsafe.Pointer(cVolumeKey))
 	}
@@ -82,23 +86,14 @@ func (device *Device) Format(deviceType DeviceType, genericParams GenericParams)
 }
 
 // Load loads crypt device parameters from the on-disk header.
-// A specific device type parameter must be provided, indicating the device's type.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
-func (device *Device) Load(deviceType DeviceType) error {
-	if !deviceType.Supports().Load {
-		return &Error{unsupported: true}
-	}
-
-	cDeviceTypeName := C.CString(deviceType.Name())
-	defer C.free(unsafe.Pointer(cDeviceTypeName))
-
-	err := C.crypt_load(device._cDevice, cDeviceTypeName, nil)
+func (device *Device) Load() error {
+	err := C.crypt_load(device._cDevice, nil, nil)
 	if err < 0 {
 		return &Error{functionName: "crypt_load", code: int(err)}
 	}
 
-	device._type = deviceType
 	return nil
 }
 
@@ -110,10 +105,8 @@ func (device *Device) KeyslotAddByVolumeKey(keyslot int, volumeKey string, passp
 		return &Error{unsupported: true}
 	}
 
-	var cVolumeKey *C.char
-	if volumeKey == "" {
-		cVolumeKey = nil
-	} else {
+	var cVolumeKey *C.char = nil
+	if len(volumeKey) > 0 {
 		cVolumeKey = C.CString(volumeKey)
 		defer C.free(unsafe.Pointer(cVolumeKey))
 	}
@@ -208,8 +201,11 @@ func (device *Device) ActivateByVolumeKey(deviceName string, volumeKey string, v
 	cDeviceName := C.CString(deviceName)
 	defer C.free(unsafe.Pointer(cDeviceName))
 
-	cVolumeKey := C.CString(volumeKey)
-	defer C.free(unsafe.Pointer(cVolumeKey))
+	var cVolumeKey *C.char = nil
+	if len(volumeKey) > 0 {
+		cVolumeKey = C.CString(volumeKey)
+		defer C.free(unsafe.Pointer(cVolumeKey))
+	}
 
 	err := C.crypt_activate_by_volume_key(device._cDevice, cDeviceName, cVolumeKey, C.size_t(volumeKeySize), C.uint32_t(flags))
 	if err < 0 {

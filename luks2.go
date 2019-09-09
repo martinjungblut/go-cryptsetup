@@ -207,6 +207,5 @@ func (luks2 LUKS2) Supports() supportedOperations {
 		KeyslotAddByPassphrase:    true,
 		KeyslotAddByVolumeKey:     true,
 		KeyslotChangeByPassphrase: true,
-		Load:                      true,
 	}
 }

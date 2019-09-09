@@ -47,6 +47,5 @@ func (plain Plain) Supports() supportedOperations {
 		KeyslotAddByPassphrase:    false,
 		KeyslotAddByVolumeKey:     false,
 		KeyslotChangeByPassphrase: false,
-		Load:                      false,
 	}
 }
