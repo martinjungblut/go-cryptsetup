@@ -24,6 +24,66 @@ func Test_Device_Init_Fails_If_Device_Is_Not_Found(test *testing.T) {
 	testWrapper.AssertErrorCodeEquals(err, -15)
 }
 
+func Test_Device_Free_Works(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(
+		cryptsetup.LUKS1{Hash: "sha256"},
+		cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8},
+	)
+	testWrapper.AssertNoError(err)
+
+	code := device.Dump()
+	if code != 0 {
+		test.Error("Dump() should have returned `0`.")
+	}
+
+	if device.Free() != true {
+		test.Error("Free should have returned `true`.")
+	}
+
+	code = device.Dump()
+	if code != -22 {
+		test.Error("Dump() should have returned `-22`.")
+	}
+}
+
+func Test_Device_Free_Doesnt_Fail_For_Empty_Device(test *testing.T) {
+	device := &cryptsetup.Device{}
+
+	if device.Free() != true {
+		test.Error("Free should have returned `true`.")
+	}
+
+	if device.Free() != false {
+		test.Error("Free should have returned `false`.")
+	}
+}
+
+func Test_Device_Free_Doesnt_Fail_If_Called_Multiple_Times(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(
+		cryptsetup.LUKS1{Hash: "sha256"},
+		cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8},
+	)
+	testWrapper.AssertNoError(err)
+
+	if device.Free() != true {
+		test.Error("Free should have returned `true`.")
+	}
+
+	if device.Free() != false {
+		test.Error("Free should have returned `false`.")
+	}
+}
+
 func Test_Device_Deactivate_Fails_If_Device_Is_Not_Active(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
