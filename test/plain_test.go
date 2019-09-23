@@ -52,7 +52,7 @@ func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	device.Free()
 }
 
-func Test_Plain_Format(test *testing.T) {
+func Test_Plain_Format_Should_Not_Be_Supported(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
 	device, err := cryptsetup.Init(DevicePath)

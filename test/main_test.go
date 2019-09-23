@@ -40,14 +40,6 @@ func (testWrapper TestWrapper) AssertErrorCodeEquals(err error, expectedErrorCod
 	}
 }
 
-func (testWrapper TestWrapper) AssertUnsupportedError(err error) {
-	expectedMessage := "Operation unsupported for this device type."
-
-	if err.(*cryptsetup.Error).Error() != expectedMessage {
-		testWrapper.test.Error("Operation should be unsupported, but wasn't reported as so.")
-	}
-}
-
 func getFileMD5(filePath string, test *testing.T) string {
 	fileHandle, error := os.Open(filePath)
 	if error != nil {
