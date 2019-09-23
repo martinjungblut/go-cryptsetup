@@ -5,25 +5,6 @@ import (
 	"testing"
 )
 
-func Test_Plain_Format(test *testing.T) {
-	testWrapper := TestWrapper{test}
-
-	device, err := cryptsetup.Init(DevicePath)
-	testWrapper.AssertNoError(err)
-
-	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
-	testWrapper.AssertNoError(err)
-
-	if device.Type() != "PLAIN" {
-		test.Error("Expected type: PLAIN.")
-	}
-
-	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
-	testWrapper.AssertErrorCodeEquals(err, -22)
-
-	device.Free()
-}
-
 func Test_Plain_ActivateByPassphrase_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
@@ -67,6 +48,25 @@ func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	if device.Type() != "PLAIN" {
 		test.Error("Expected type: PLAIN.")
 	}
+
+	device.Free()
+}
+
+func Test_Plain_Format(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := cryptsetup.Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	if device.Type() != "PLAIN" {
+		test.Error("Expected type: PLAIN.")
+	}
+
+	err = device.Format(cryptsetup.Plain{Hash: "sha256"}, cryptsetup.GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertErrorCodeEquals(err, -22)
 
 	device.Free()
 }
