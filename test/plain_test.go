@@ -81,7 +81,7 @@ func Test_Plain_KeyslotAddByVolumeKey_Should_Not_Be_Supported(test *testing.T) {
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByVolumeKey(0, "", "")
-	testWrapper.AssertUnsupportedError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
 
 	device.Free()
 }
@@ -96,7 +96,7 @@ func Test_Plain_KeyslotAddByPassphrase_Should_Not_Be_Supported(test *testing.T) 
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotAddByPassphrase(0, "", "")
-	testWrapper.AssertUnsupportedError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
 
 	device.Free()
 }
@@ -111,7 +111,7 @@ func Test_Plain_KeyslotChangeByPassphrase_Should_Not_Be_Supported(test *testing.
 	testWrapper.AssertNoError(err)
 
 	err = device.KeyslotChangeByPassphrase(0, 0, "", "")
-	testWrapper.AssertUnsupportedError(err)
+	testWrapper.AssertErrorCodeEquals(err, -22)
 
 	device.Free()
 }

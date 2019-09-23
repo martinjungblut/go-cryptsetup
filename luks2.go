@@ -201,11 +201,3 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 	return unsafe.Pointer(&cParams), deallocate
 }
-
-func (luks2 LUKS2) Supports() supportedOperations {
-	return supportedOperations{
-		KeyslotAddByPassphrase:    true,
-		KeyslotAddByVolumeKey:     true,
-		KeyslotChangeByPassphrase: true,
-	}
-}

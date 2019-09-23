@@ -41,11 +41,3 @@ func (plain Plain) Unmanaged() (unsafe.Pointer, func()) {
 
 	return unsafe.Pointer(&cParams), deallocate
 }
-
-func (plain Plain) Supports() supportedOperations {
-	return supportedOperations{
-		KeyslotAddByPassphrase:    false,
-		KeyslotAddByVolumeKey:     false,
-		KeyslotChangeByPassphrase: false,
-	}
-}

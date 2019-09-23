@@ -108,10 +108,6 @@ func (device *Device) Load() error {
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_volume_key
 func (device *Device) KeyslotAddByVolumeKey(keyslot int, volumeKey string, passphrase string) error {
-	if device._type != nil && !device._type.Supports().KeyslotAddByVolumeKey {
-		return &Error{unsupported: true}
-	}
-
 	var cVolumeKey *C.char = nil
 	if len(volumeKey) > 0 {
 		cVolumeKey = C.CString(volumeKey)
@@ -133,10 +129,6 @@ func (device *Device) KeyslotAddByVolumeKey(keyslot int, volumeKey string, passp
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_add_by_passphrase
 func (device *Device) KeyslotAddByPassphrase(keyslot int, currentPassphrase string, newPassphrase string) error {
-	if device._type != nil && !device._type.Supports().KeyslotAddByPassphrase {
-		return &Error{unsupported: true}
-	}
-
 	cCurrentPassphrase := C.CString(currentPassphrase)
 	defer C.free(unsafe.Pointer(cCurrentPassphrase))
 
@@ -159,10 +151,6 @@ func (device *Device) KeyslotAddByPassphrase(keyslot int, currentPassphrase stri
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_keyslot_change_by_passphrase
 func (device *Device) KeyslotChangeByPassphrase(currentKeyslot int, newKeyslot int, currentPassphrase string, newPassphrase string) error {
-	if device._type != nil && !device._type.Supports().KeyslotChangeByPassphrase {
-		return &Error{unsupported: true}
-	}
-
 	cCurrentPassphrase := C.CString(currentPassphrase)
 	defer C.free(unsafe.Pointer(cCurrentPassphrase))
 
