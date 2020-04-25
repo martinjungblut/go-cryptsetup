@@ -1,19 +1,53 @@
+notifications:
+  email: false
+
 language: go
-
-sudo: required
-dist: bionic
-
 go_import_path: cryptsetup
 
-go:
-  - 1.10.x
-  - 1.11.x
-  - 1.12.x
-  - master
-
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
-
-script:
-  - sudo -E env "PATH=$PATH" go test -v ./...
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.10.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
+    - os: linux
+      dist: bionic
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.11.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
+    - os: linux
+      dist: bionic
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.12.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
+    - os: linux
+      dist: bionic
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.13.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
+    - os: linux
+      dist: bionic
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.14.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
