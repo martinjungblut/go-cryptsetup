@@ -11,6 +11,7 @@ func Test_Log(test *testing.T) {
 	messages := make([]string, 0)
 	levels := make([]int, 0)
 
+	cryptsetup.SetDebugLevel(cryptsetup.CRYPT_DEBUG_ALL)
 	cryptsetup.SetLogCallback(func(level int, message string) {
 		levels = append(levels, level)
 		messages = append(messages, message)
