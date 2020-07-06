@@ -222,3 +222,9 @@ func (device *Device) Deactivate(deviceName string) error {
 
 	return nil
 }
+
+// SetDebugLevel sets the debug level for the library.
+// C equivalent: crypt_set_debug_level
+func SetDebugLevel(debugLevel int) {
+	C.crypt_set_debug_level(C.int(debugLevel))
+}
