@@ -20,16 +20,18 @@ func Test_Log(test *testing.T) {
 	device, err := cryptsetup.Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
-	for i := 1; i <= 3; i++ {
+	for i := 0; i < 3; i++ {
+		levelsPreviousLength, messagesPreviousLength := len(levels), len(messages)
+
 		err = device.Deactivate(DevicePath)
 		testWrapper.AssertError(err)
 
-		if len(levels) != i {
-			test.Errorf("Expected 'levels' length to be %d, but was %d.", i, len(levels))
+		if levelsPreviousLength >= len(levels) {
+			test.Errorf("'levels' should have increased its length. Previous: %d Current: %d", levelsPreviousLength, len(levels))
 		}
 
-		if len(messages) != i {
-			test.Errorf("Expected 'messages' length to be %d, but was %d.", i, len(messages))
+		if messagesPreviousLength >= len(messages) {
+			test.Errorf("'messages' should have increased its length. Previous: %d Current: %d", messagesPreviousLength, len(messages))
 		}
 	}
 }
