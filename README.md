@@ -39,6 +39,10 @@ This project is a _pure Go interface for libcryptsetup_, providing a clean and p
 
 These bindings have been tested using libcryptsetup >= 2.0.
 
+TravisCI runs the test suite on Ubuntu 20.04 and 18.04.
+
+Locally, I also test on openSUSE Tumbleweed, typically with the latest version of libcryptsetup.
+
 
 ## Installation <a name="installation"></a>
 
@@ -60,8 +64,11 @@ On Fedora, CentOS and RHEL:
 
 `# dnf install cryptsetup-devel cryptsetup-libs`
 
-On Gentoo, the `sys-fs/cryptsetup` package is masked for versions >= 2.0.
-You might want to unmask it, and then:
+On openSUSE Tumbleweed and Leap:
+
+`# zypper in libcryptsetup12 libcryptsetup-devel`
+
+On Gentoo:
 
 `# emerge sys-fs/cryptsetup`
 
