@@ -1,7 +1,6 @@
-package test
+package cryptsetup
 
 import (
-	"cryptsetup"
 	"testing"
 )
 
@@ -11,13 +10,13 @@ func Test_Log(test *testing.T) {
 	messages := make([]string, 0)
 	levels := make([]int, 0)
 
-	cryptsetup.SetDebugLevel(cryptsetup.CRYPT_DEBUG_ALL)
-	cryptsetup.SetLogCallback(func(level int, message string) {
+	SetDebugLevel(CRYPT_DEBUG_ALL)
+	SetLogCallback(func(level int, message string) {
 		levels = append(levels, level)
 		messages = append(messages, message)
 	})
 
-	device, err := cryptsetup.Init(DevicePath)
+	device, err := Init(DevicePath)
 	testWrapper.AssertNoError(err)
 
 	for i := 0; i < 3; i++ {

@@ -1,9 +1,8 @@
-package test
+package cryptsetup
 
 import (
 	"crypto/md5"
 	"crypto/rand"
-	"cryptsetup"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -33,7 +32,7 @@ func (testWrapper TestWrapper) AssertNoError(err error) {
 }
 
 func (testWrapper TestWrapper) AssertErrorCodeEquals(err error, expectedErrorCode int) {
-	actualErrorCode := err.(*cryptsetup.Error).Code()
+	actualErrorCode := err.(*Error).Code()
 
 	if actualErrorCode != expectedErrorCode {
 		testWrapper.test.Error(fmt.Sprintf("Error code should be '%d', but '%d' was returned instead.", expectedErrorCode, actualErrorCode))
