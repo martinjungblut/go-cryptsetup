@@ -237,19 +237,19 @@ func (device *Device) VolumeKeyGet(keyslot int, passphrase string) ([]byte, int,
 	defer C.free(unsafe.Pointer(cPassphrase))
 
 	cVKSize := C.crypt_get_volume_key_size(device.cryptDevice)
-	cVKPointer := C.crypt_safe_alloc(C.ulong(cVKSize))
-	if cVKPointer == nil {
-		return []byte{}, 0, &Error{functionName: "crypt_safe_alloc"}
+	cVKSizePointer := C.malloc(C.size_t(cVKSize))
+	if cVKSizePointer == nil {
+		return []byte{}, 0, &Error{functionName: "malloc"}
 	}
-	defer C.crypt_safe_free(cVKPointer)
+	defer C.free(cVKSizePointer)
 
 	err := C.crypt_volume_key_get(
 		device.cryptDevice, C.int(keyslot),
-		(*C.char)(cVKPointer), (*C.size_t)(unsafe.Pointer(&cVKSize)),
+		(*C.char)(cVKSizePointer), (*C.size_t)(unsafe.Pointer(&cVKSize)),
 		cPassphrase, C.size_t(len(passphrase)),
 	)
 	if err < 0 {
 		return []byte{}, 0, &Error{functionName: "crypt_volume_key_get", code: int(err)}
 	}
-	return C.GoBytes(unsafe.Pointer(cVKPointer), C.int(cVKSize)), int(err), nil
+	return C.GoBytes(unsafe.Pointer(cVKSizePointer), C.int(cVKSize)), int(err), nil
 }
