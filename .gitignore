@@ -3,9 +3,10 @@
 !devicetypes
 !test
 
-!**.go
-!**.txt
 !**.md
+!**.txt
+!**.mod
+!**.go
 !**.c
 !**.h
 

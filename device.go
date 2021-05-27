@@ -228,3 +228,28 @@ func (device *Device) Deactivate(deviceName string) error {
 func SetDebugLevel(debugLevel int) {
 	C.crypt_set_debug_level(C.int(debugLevel))
 }
+
+// VolumeKeyGet gets the volume key from a crypt device.
+// Returns a slice of bytes having the volume key and the unlocked key slot number, or an error otherwise.
+// C equivalent: crypt_volume_key_get
+func (device *Device) VolumeKeyGet(keyslot int, passphrase string) ([]byte, int, error) {
+	cPassphrase := C.CString(passphrase)
+	defer C.free(unsafe.Pointer(cPassphrase))
+
+	cVKSize := C.crypt_get_volume_key_size(device.cryptDevice)
+	cVKSizePointer := C.malloc(C.size_t(cVKSize))
+	if cVKSizePointer == nil {
+		return []byte{}, 0, &Error{functionName: "malloc"}
+	}
+	defer C.free(cVKSizePointer)
+
+	err := C.crypt_volume_key_get(
+		device.cryptDevice, C.int(keyslot),
+		(*C.char)(cVKSizePointer), (*C.size_t)(unsafe.Pointer(&cVKSize)),
+		cPassphrase, C.size_t(len(passphrase)),
+	)
+	if err < 0 {
+		return []byte{}, 0, &Error{functionName: "crypt_volume_key_get", code: int(err)}
+	}
+	return C.GoBytes(unsafe.Pointer(cVKSizePointer), C.int(cVKSize)), int(err), nil
+}
