@@ -105,8 +105,7 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 	cParams.pbkdf = nil
 	if luks2.PBKDFType != nil {
-		var cPBKDFType *C.struct_crypt_pbkdf_type
-		cPBKDFType = (*C.struct_crypt_pbkdf_type)(C.malloc(C.sizeof_struct_crypt_pbkdf_type))
+		cPBKDFType := (*C.struct_crypt_pbkdf_type)(C.malloc(C.sizeof_struct_crypt_pbkdf_type))
 
 		cPBKDFType._type = nil
 		if luks2.PBKDFType.Type != "" {
@@ -139,8 +138,7 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 	cParams.integrity_params = nil
 	if luks2.IntegrityParams != nil {
-		var cIntegrityParams *C.struct_crypt_params_integrity
-		cIntegrityParams = (*C.struct_crypt_params_integrity)(C.malloc(C.sizeof_struct_crypt_params_integrity))
+		cIntegrityParams := (*C.struct_crypt_params_integrity)(C.malloc(C.sizeof_struct_crypt_params_integrity))
 
 		cIntegrityParams.journal_size = C.uint64_t(luks2.IntegrityParams.JournalSize)
 		cIntegrityParams.journal_watermark = C.uint(luks2.IntegrityParams.JournalWatermark)

@@ -33,7 +33,7 @@ func Init(devicePath string) (*Device, error) {
 // Free releases crypt device context and used memory.
 // C equivalent: crypt_free
 func (device *Device) Free() bool {
-	if device.freed == false {
+	if !device.freed {
 		C.crypt_free(device.cryptDevice)
 		device.freed = true
 		return true
