@@ -163,4 +163,16 @@ const (
 
 	/** use direct-io */
 	CRYPT_WIPE_NO_DIRECT_IO = C.CRYPT_WIPE_NO_DIRECT_IO
+
+	/**< Fill with zeroes */
+	CRYPT_WIPE_ZERO = C.CRYPT_WIPE_ZERO
+
+	/**< Use RNG to fill data */
+	CRYPT_WIPE_RANDOM = C.CRYPT_WIPE_RANDOM
+
+	/**< Add encryption and fill with zeroes as plaintext */
+	CRYPT_WIPE_ENCRYPTED_ZERO = C.CRYPT_WIPE_ENCRYPTED_ZERO
+
+	/**< Compatibility only, do not use (Gutmann method) */
+	CRYPT_WIPE_SPECIAL = C.CRYPT_WIPE_SPECIAL
 )
