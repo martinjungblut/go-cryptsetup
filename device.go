@@ -3,6 +3,7 @@ package cryptsetup
 // #cgo pkg-config: libcryptsetup
 // #include <libcryptsetup.h>
 // #include <stdlib.h>
+//extern int progress_callback(uint64_t size, uint64_t offset, void *usrptr);
 import "C"
 import (
 	"unsafe"
@@ -85,6 +86,36 @@ func (device *Device) Format(deviceType DeviceType, genericParams GenericParams)
 	err := C.crypt_format(device.cryptDevice, cryptDeviceTypeName, cCipher, cCipherMode, cUUID, cVolumeKey, cVolumeKeySize, cTypeParams)
 	if err < 0 {
 		return &Error{functionName: "crypt_format", code: int(err)}
+	}
+
+	return nil
+}
+
+var progressCallback func(size, offset uint64) int
+
+//export progress_callback
+func progress_callback(size C.uint64_t, offset C.uint64_t, usrptr unsafe.Pointer) C.int {
+	if progressCallback != nil {
+		ret := progressCallback(uint64(size), uint64(offset))
+		return C.int(ret)
+	}
+	return 0
+}
+
+// Wipe wipes/fills (part of) a device with the selected pattern.
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_wipe
+func (device *Device) Wipe(devicePath string, pattern int, offset, length uint64, wipeBlockSize, flags int, progress func(size, offset uint64) int) error {
+	cWipeBlockSize := C.size_t(wipeBlockSize)
+
+	cDevicePath := C.CString(devicePath)
+	defer C.free(unsafe.Pointer(cDevicePath))
+
+	progressCallback = progress
+
+	err := C.crypt_wipe(device.cryptDevice, cDevicePath, 0, C.uint64_t(offset), C.uint64_t(length), cWipeBlockSize, C.uint32_t(flags), (*[0]byte)(C.progress_callback), nil)
+	if err < 0 {
+		return &Error{functionName: "crypt_wipe", code: int(err)}
 	}
 
 	return nil

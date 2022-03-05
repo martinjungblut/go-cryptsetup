@@ -281,3 +281,52 @@ func Test_LUKS2_KeyslotChangeByPassphrase(test *testing.T) {
 
 	device.Free()
 }
+
+func Test_LUKS2_Wipe(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	luks2Params := LUKS2{
+		SectorSize: 512,
+		Integrity:  "hmac(sha256)",
+	}
+	genericParams := GenericParams{
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKeySize: 512/8 + 256/8,
+	}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	hashBeforeFormat := getFileMD5(DevicePath, test)
+
+	err = device.Format(luks2Params, genericParams)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByVolumeKey(DeviceName, "", genericParams.VolumeKeySize, (CRYPT_ACTIVATE_PRIVATE | CRYPT_ACTIVATE_NO_JOURNAL))
+	testWrapper.AssertNoError(err)
+
+	progressFunc := func(size, offset uint64) int {
+		prog := (float64(offset) / float64(size)) * 100
+		test.Logf("Wipe in progress: %.2f%%", prog)
+		return 0
+	}
+
+	err = device.Wipe("/dev/mapper/"+DeviceName, CRYPT_WIPE_ZERO, 0, 0, 1024*1024, 0, progressFunc)
+	testWrapper.AssertNoError(err)
+
+	hashAfterFormat := getFileMD5(DevicePath, test)
+
+	if hashBeforeFormat == hashAfterFormat {
+		test.Error("Unsuccessful call to Format() when using LUKS2 parameters.")
+	}
+
+	if device.Type() != "LUKS2" {
+		test.Error("Expected type: LUKS2.")
+	}
+
+	err = device.Deactivate(DeviceName)
+	testWrapper.AssertNoError(err)
+
+	device.Free()
+}
