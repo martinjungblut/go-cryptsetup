@@ -12,7 +12,7 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
-      go: 1.15.x
+      go: 1.16.x
       script:
         - sudo -E env "PATH=$PATH" go test -v ./...
     - os: linux
@@ -21,16 +21,7 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
-      go: 1.16.x
-      script:
-        - sudo -E env "PATH=$PATH" go test -v ./...
-    - os: linux
-      dist: focal
-      sudo: required
-      before_install:
-        - sudo apt-get update
-        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
-      go: 1.15.x
+      go: 1.17.x
       script:
         - sudo -E env "PATH=$PATH" go test -v ./...
     - os: linux
@@ -40,5 +31,14 @@ jobs:
         - sudo apt-get update
         - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
       go: 1.16.x
+      script:
+        - sudo -E env "PATH=$PATH" go test -v ./...
+    - os: linux
+      dist: focal
+      sudo: required
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      go: 1.17.x
       script:
         - sudo -E env "PATH=$PATH" go test -v ./...

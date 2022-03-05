@@ -39,9 +39,10 @@ This project is a _pure Go interface for libcryptsetup_, providing a clean and p
 
 These bindings have been tested using libcryptsetup >= 2.0.
 
-TravisCI runs the test suite on Ubuntu 20.04 and 18.04.
+TravisCI runs the test suite on Ubuntu 20.04 and 18.04, using the libcryptsetup packages available on those distributions.
+TravisCI uses both Go 1.16 and 1.17 to run these tests.
 
-Locally, I also test on openSUSE Tumbleweed, typically with the latest version of libcryptsetup.
+Locally, I also test on Fedora, using the latest version of libcryptsetup and Go.
 
 
 ## Installation <a name="installation"></a>
