@@ -1,6 +1,6 @@
 # Go bindings for libcryptsetup
 
-[![Build Status](https://travis-ci.org/martinjungblut/go-cryptsetup.svg?branch=master)](https://travis-ci.org/martinjungblut/go-cryptsetup)
+[![Build Status](https://app.travis-ci.com/martinjungblut/go-cryptsetup.svg?branch=master)](https://app.travis-ci.com/github/martinjungblut/go-cryptsetup)
 
 ## Table of contents
 1. [Rationale](#rationale)
