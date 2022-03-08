@@ -121,11 +121,24 @@ func (device *Device) Wipe(devicePath string, pattern int, offset, length uint64
 	return nil
 }
 
-// Load loads crypt device parameters from the on-disk header.
+// Load loads crypt device parameters from the device type parameters if it is
+// specified, otherwise it loads the device from the on-disk header.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_load
-func (device *Device) Load() error {
-	err := C.crypt_load(device.cryptDevice, nil, nil)
+func (device *Device) Load(deviceType DeviceType) error {
+	var cryptDeviceTypeName *C.char
+	var cTypeParams unsafe.Pointer
+
+	if deviceType != nil {
+		cryptDeviceTypeName = C.CString(deviceType.Name())
+		defer C.free(unsafe.Pointer(cryptDeviceTypeName))
+
+		var freeCTypeParams func()
+		cTypeParams, freeCTypeParams = deviceType.Unmanaged()
+		defer freeCTypeParams()
+	}
+
+	err := C.crypt_load(device.cryptDevice, cryptDeviceTypeName, cTypeParams)
 	if err < 0 {
 		return &Error{functionName: "crypt_load", code: int(err)}
 	}
