@@ -1,6 +1,6 @@
 # Go bindings for libcryptsetup
 
-[![Build Status](https://app.travis-ci.com/martinjungblut/go-cryptsetup.svg?branch=master)](https://app.travis-ci.com/github/martinjungblut/go-cryptsetup)
+[![run-tests](https://github.com/martinjungblut/go-cryptsetup/actions/workflows/run-tests.yml/badge.svg)](https://github.com/martinjungblut/go-cryptsetup/actions/workflows/run-tests.yml)
 
 ## Table of contents
 1. [Rationale](#rationale)
@@ -39,8 +39,12 @@ This project is a _pure Go interface for libcryptsetup_, providing a clean and p
 
 These bindings have been tested using libcryptsetup >= 2.0.
 
-TravisCI runs the test suite on Ubuntu 20.04 and 18.04, using the libcryptsetup packages available on those distributions.
-TravisCI uses both Go 1.16 and 1.17 to run these tests.
+GitHub Actions runs the test suite using the following version combinations:
+
+| Ubuntu version | Go version | libcryptsetup version |
+|----------------|------------|-----------------------|
+| 20.04 LTS      | 1.17       | 2.2.2                 |
+| 18.04 LTS      | 1.16       | 2.0.2                 |
 
 Locally, I also test on Fedora, using the latest version of libcryptsetup and Go.
 
