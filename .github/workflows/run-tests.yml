@@ -1,13 +1,23 @@
 name: run-tests
 on: [push]
 jobs:
-  run-tests:
-    runs-on: ubuntu-latest
+  run-tests-ubuntu-20.04-go-1.17:
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.16'
+          go-version: '1.17'
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
+      - run: sudo go test -v ./...
+  run-tests-ubuntu-18.04-go-1.17:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
       - run: sudo apt-get update
       - run: sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
       - run: sudo go test -v ./...
