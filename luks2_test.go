@@ -140,7 +140,7 @@ func Test_LUKS2_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 
 	device, err = Init(DevicePath)
 	testWrapper.AssertNoError(err)
-	err = device.Load()
+	err = device.Load(nil)
 	testWrapper.AssertNoError(err)
 
 	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", CRYPT_ACTIVATE_READONLY)
