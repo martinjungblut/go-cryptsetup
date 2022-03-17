@@ -43,6 +43,7 @@ GitHub Actions runs the test suite using the following version combinations:
 
 | Ubuntu version | Go version | libcryptsetup version |
 |----------------|------------|-----------------------|
+| 20.04 LTS      | 1.18       | 2.2.2                 |
 | 20.04 LTS      | 1.17       | 2.2.2                 |
 | 18.04 LTS      | 1.16       | 2.0.2                 |
 
