@@ -297,3 +297,10 @@ func (device *Device) VolumeKeyGet(keyslot int, passphrase string) ([]byte, int,
 	}
 	return C.GoBytes(unsafe.Pointer(cVKSizePointer), C.int(cVKSize)), int(err), nil
 }
+
+// GetUUID gets the device's UUID.
+// C equivalent: crypt_get_uuid
+func (device *Device) GetUUID() string {
+	res := C.crypt_get_uuid(device.cryptDevice)
+	return C.GoString(res)
+}

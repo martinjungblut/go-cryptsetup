@@ -205,3 +205,35 @@ func Test_Device_VolumeKeyGet_Fails_If_Wrong_Passphrase(test *testing.T) {
 		test.Errorf("Volume key slot should have been zero, but was: %d", volumeKeySlot)
 	}
 }
+
+func Test_Device_GetUUID(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device := &Device{}
+	uid := device.GetUUID()
+	if uid != "" {
+		test.Error("UUID should be empty")
+	}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	uid = device.GetUUID()
+	if uid == "" {
+		test.Error("Should have generated a UUID")
+	}
+
+	newUUID := "12345678-1234-1234-1234-12345678abcd"
+	device.Free()
+	device, err = Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", UUID: newUUID, VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+	uid = device.GetUUID()
+	if uid != newUUID {
+		test.Errorf("Returned a different UUID than was set for the device: got %s, expected %s", uid, newUUID)
+	}
+}
