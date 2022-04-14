@@ -23,6 +23,14 @@ func Test_Device_Init_Fails_If_Device_Is_Not_Found(test *testing.T) {
 	testWrapper.AssertErrorCodeEquals(err, -15)
 }
 
+func Test_Device_InitByName_Fails_If_Device_Is_Not_Active(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	_, err := InitByName("nonExistingMappedDevice")
+	testWrapper.AssertError(err)
+	testWrapper.AssertErrorCodeEquals(err, -19)
+}
+
 func Test_Device_Free_Works(test *testing.T) {
 	testWrapper := TestWrapper{test}
 

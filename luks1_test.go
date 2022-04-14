@@ -60,6 +60,43 @@ func Test_LUKS1_Load_ActivateByPassphrase_Deactivate(test *testing.T) {
 	device.Free()
 }
 
+func Test_LUKS1_Load_ActivateByPassphrase_Free_InitByName_Deactivate(test *testing.T) {
+	testWrapper := TestWrapper{test}
+	luks1 := LUKS1{Hash: "sha256"}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	err = device.Format(luks1, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
+	testWrapper.AssertNoError(err)
+
+	device.Free()
+
+	device, err = Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	err = device.Load(nil)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByPassphrase(DeviceName, 0, "testPassphrase", CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+
+	device.Free()
+
+	device, err = InitByName(DeviceName)
+	testWrapper.AssertNoError(err)
+
+	err = device.Deactivate(DeviceName)
+	testWrapper.AssertNoError(err)
+
+	if device.Type() != "LUKS1" {
+		test.Error("Expected type: LUKS1.")
+	}
+
+	device.Free()
+}
+
 func Test_LUKS1_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
