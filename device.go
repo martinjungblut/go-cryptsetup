@@ -31,6 +31,21 @@ func Init(devicePath string) (*Device, error) {
 	return &Device{cryptDevice: cryptDevice}, nil
 }
 
+// InitByName initializes a crypt device from provided active device 'name'.
+// Returns a pointer to the newly allocated Device or any error encountered.
+// C equivalent: crypt_init_by_name
+func InitByName(name string) (*Device, error) {
+	activeCryptDeviceName := C.CString(name)
+	defer C.free(unsafe.Pointer(activeCryptDeviceName))
+
+	var cryptDevice *C.struct_crypt_device
+	if err := int(C.crypt_init_by_name(&cryptDevice, activeCryptDeviceName)); err < 0 {
+		return nil, &Error{functionName: "crypt_init_by_name", code: err}
+	}
+
+	return &Device{cryptDevice: cryptDevice}, nil
+}
+
 // Free releases crypt device context and used memory.
 // C equivalent: crypt_free
 func (device *Device) Free() bool {
@@ -296,4 +311,11 @@ func (device *Device) VolumeKeyGet(keyslot int, passphrase string) ([]byte, int,
 		return []byte{}, 0, &Error{functionName: "crypt_volume_key_get", code: int(err)}
 	}
 	return C.GoBytes(unsafe.Pointer(cVKSizePointer), C.int(cVKSize)), int(err), nil
+}
+
+// GetUUID gets the device's UUID.
+// C equivalent: crypt_get_uuid
+func (device *Device) GetUUID() string {
+	res := C.crypt_get_uuid(device.cryptDevice)
+	return C.GoString(res)
 }

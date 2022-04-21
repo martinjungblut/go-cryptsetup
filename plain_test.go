@@ -22,6 +22,29 @@ func Test_Plain_ActivateByPassphrase_Deactivate(test *testing.T) {
 	device.Free()
 }
 
+func Test_Plain_ActivateByPassphrase_Free_InitByName_Deactivate(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Format(Plain{Hash: "sha256"}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByPassphrase(DevicePath, 0, PassKey, CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+
+	device.Free()
+
+	device, err = InitByName(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	err = device.Deactivate(DevicePath)
+	testWrapper.AssertNoError(err)
+
+	device.Free()
+}
+
 func Test_Plain_ActivateByVolumeKey_Deactivate(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
