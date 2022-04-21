@@ -35,7 +35,7 @@ func (testWrapper TestWrapper) AssertErrorCodeEquals(err error, expectedErrorCod
 	actualErrorCode := err.(*Error).Code()
 
 	if actualErrorCode != expectedErrorCode {
-		testWrapper.test.Error(fmt.Sprintf("Error code should be '%d', but '%d' was returned instead.", expectedErrorCode, actualErrorCode))
+		testWrapper.test.Errorf("Error code should be '%d', but '%d' was returned instead.", expectedErrorCode, actualErrorCode)
 	}
 }
 
@@ -76,7 +76,7 @@ func teardown() {
 
 func TestMain(m *testing.M) {
 	if os.Getuid() != 0 {
-		fmt.Printf("This test suite requires root privileges, as libcrypsetup uses the kernel's device mapper.\n")
+		fmt.Println("This test suite requires root privileges, as libcrypsetup uses the kernel's device mapper.")
 		os.Exit(1)
 	}
 
