@@ -136,6 +136,22 @@ func (device *Device) Wipe(devicePath string, pattern int, offset, length uint64
 	return nil
 }
 
+// Resize the crypt device.
+// Set newSize to 0 to use all of the underlying device size
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_resize
+func (device *Device) Resize(name string, newSize uint64) error {
+	cryptDeviceName := C.CString(name)
+	defer C.free(unsafe.Pointer(cryptDeviceName))
+
+	err := C.crypt_resize(device.cryptDevice, cryptDeviceName, C.uint64_t(newSize))
+	if err < 0 {
+		return &Error{functionName: "crypt_resize", code: int(err)}
+	}
+
+	return nil
+}
+
 // Load loads crypt device parameters from the device type parameters if it is
 // specified, otherwise it loads the device from the on-disk header.
 // Returns nil on success, or an error otherwise.

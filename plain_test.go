@@ -137,3 +137,27 @@ func Test_Plain_KeyslotChangeByPassphrase_Should_Not_Be_Supported(test *testing.
 
 	device.Free()
 }
+
+func Test_Plain_Resize(test *testing.T) {
+	resizeDiskPath := "testResizeDevice"
+	setup(resizeDiskPath)
+	defer teardown(resizeDiskPath)
+
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(resizeDiskPath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	err = device.Format(Plain{Hash: "sha256"}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByPassphrase(DeviceName, 0, PassKey, CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+	defer device.Deactivate(DeviceName)
+
+	resize(resizeDiskPath)
+
+	err = device.Resize(DeviceName, 0)
+	testWrapper.AssertNoError(err)
+}
