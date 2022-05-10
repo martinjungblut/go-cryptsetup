@@ -245,11 +245,15 @@ func (device *Device) KeyslotChangeByPassphrase(currentKeyslot int, newKeyslot i
 }
 
 // ActivateByPassphrase activates a device by using a passphrase from a specific keyslot.
+// If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_activate_by_passphrase
 func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passphrase string, flags int) error {
-	cryptDeviceName := C.CString(deviceName)
-	defer C.free(unsafe.Pointer(cryptDeviceName))
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
 
 	cPassphrase := C.CString(passphrase)
 	defer C.free(unsafe.Pointer(cPassphrase))
@@ -263,11 +267,15 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 }
 
 // ActivateByVolumeKey activates a device by using a volume key.
+// If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_activate_by_volume_key
 func (device *Device) ActivateByVolumeKey(deviceName string, volumeKey string, volumeKeySize int, flags int) error {
-	cryptDeviceName := C.CString(deviceName)
-	defer C.free(unsafe.Pointer(cryptDeviceName))
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
 
 	var cVolumeKey *C.char = nil
 	if len(volumeKey) > 0 {
