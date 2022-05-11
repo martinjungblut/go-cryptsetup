@@ -214,6 +214,21 @@ func Test_Device_VolumeKeyGet_Fails_If_Wrong_Passphrase(test *testing.T) {
 	}
 }
 
+func Test_Device_GetDeviceName(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	devicePath := device.GetDeviceName()
+	if devicePath != DevicePath {
+		test.Errorf("Returned the wrong device path: got %s, expected %s", devicePath, DevicePath)
+	}
+}
+
 func Test_Device_GetUUID(test *testing.T) {
 	testWrapper := TestWrapper{test}
 
