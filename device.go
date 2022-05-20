@@ -136,6 +136,22 @@ func (device *Device) Wipe(devicePath string, pattern int, offset, length uint64
 	return nil
 }
 
+// Resize the crypt device.
+// Set newSize to 0 to use all of the underlying device size
+// Returns nil on success, or an error otherwise.
+// C equivalent: crypt_resize
+func (device *Device) Resize(name string, newSize uint64) error {
+	cryptDeviceName := C.CString(name)
+	defer C.free(unsafe.Pointer(cryptDeviceName))
+
+	err := C.crypt_resize(device.cryptDevice, cryptDeviceName, C.uint64_t(newSize))
+	if err < 0 {
+		return &Error{functionName: "crypt_resize", code: int(err)}
+	}
+
+	return nil
+}
+
 // Load loads crypt device parameters from the device type parameters if it is
 // specified, otherwise it loads the device from the on-disk header.
 // Returns nil on success, or an error otherwise.
@@ -229,11 +245,15 @@ func (device *Device) KeyslotChangeByPassphrase(currentKeyslot int, newKeyslot i
 }
 
 // ActivateByPassphrase activates a device by using a passphrase from a specific keyslot.
+// If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_activate_by_passphrase
 func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passphrase string, flags int) error {
-	cryptDeviceName := C.CString(deviceName)
-	defer C.free(unsafe.Pointer(cryptDeviceName))
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
 
 	cPassphrase := C.CString(passphrase)
 	defer C.free(unsafe.Pointer(cPassphrase))
@@ -247,11 +267,15 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 }
 
 // ActivateByVolumeKey activates a device by using a volume key.
+// If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_activate_by_volume_key
 func (device *Device) ActivateByVolumeKey(deviceName string, volumeKey string, volumeKeySize int, flags int) error {
-	cryptDeviceName := C.CString(deviceName)
-	defer C.free(unsafe.Pointer(cryptDeviceName))
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
 
 	var cVolumeKey *C.char = nil
 	if len(volumeKey) > 0 {
@@ -311,6 +335,13 @@ func (device *Device) VolumeKeyGet(keyslot int, passphrase string) ([]byte, int,
 		return []byte{}, 0, &Error{functionName: "crypt_volume_key_get", code: int(err)}
 	}
 	return C.GoBytes(unsafe.Pointer(cVKSizePointer), C.int(cVKSize)), int(err), nil
+}
+
+// GetDeviceName gets the path to the underlying device.
+// C equivalent: crypt_get_device_name
+func (device *Device) GetDeviceName() string {
+	res := C.crypt_get_device_name(device.cryptDevice)
+	return C.GoString(res)
 }
 
 // GetUUID gets the device's UUID.

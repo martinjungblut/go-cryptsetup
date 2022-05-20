@@ -222,3 +222,34 @@ func Test_LUKS1_KeyslotChangeByPassphrase(test *testing.T) {
 
 	device.Free()
 }
+
+func Test_LUKS1_Resize(test *testing.T) {
+	resizeDiskPath := "testResizeDevice"
+	setup(resizeDiskPath)
+	defer teardown(resizeDiskPath)
+
+	testWrapper := TestWrapper{test}
+
+	genericParams := GenericParams{
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKey:     generateKey(512/8, test),
+		VolumeKeySize: 512 / 8,
+	}
+
+	device, err := Init(resizeDiskPath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	err = device.Format(LUKS1{Hash: "sha256"}, genericParams)
+	testWrapper.AssertNoError(err)
+
+	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, CRYPT_ACTIVATE_READONLY)
+	testWrapper.AssertNoError(err)
+	defer device.Deactivate(DeviceName)
+
+	resize(resizeDiskPath)
+
+	err = device.Resize(DeviceName, 0)
+	testWrapper.AssertNoError(err)
+}

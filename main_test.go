@@ -66,12 +66,16 @@ func generateKey(length int, test *testing.T) string {
 	return string(bytes[:])
 }
 
-func setup() {
-	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", DevicePath), "bs=64M", "count=1").Run()
+func setup(devicePath string) {
+	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=64M", "count=1").Run()
 }
 
-func teardown() {
-	exec.Command("/bin/rm", "-f", DevicePath).Run()
+func teardown(devicePath string) {
+	exec.Command("/bin/rm", "-f", devicePath).Run()
+}
+
+func resize(devicePath string) {
+	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=32M", "count=1", "oflag=append", "conv=notrunc").Run()
 }
 
 func TestMain(m *testing.M) {
@@ -80,8 +84,8 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	setup()
+	setup(DevicePath)
 	result := m.Run()
-	teardown()
+	teardown(DevicePath)
 	os.Exit(result)
 }
