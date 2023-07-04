@@ -1,6 +1,7 @@
 package cryptsetup
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -258,5 +259,95 @@ func Test_Device_GetUUID(test *testing.T) {
 	uid = device.GetUUID()
 	if uid != newUUID {
 		test.Errorf("Returned a different UUID than was set for the device: got %s, expected %s", uid, newUUID)
+	}
+}
+
+func Test_Device_DumpJSON(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	// Format the device using aes-xts-plain64
+	cipher := "aes"
+	cipherMode := "xts-plain64"
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: cipher, CipherMode: cipherMode, VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	// Dump device info
+	jsonInfo, err := device.DumpJSON()
+	testWrapper.AssertNoError(err)
+
+	// Check that the cipher and cipher mode are correct
+	type segment struct {
+		Encryption string `json:"encryption"`
+	}
+	var info struct {
+		Segments map[string]segment `json:"segments"`
+	}
+
+	err = json.Unmarshal([]byte(jsonInfo), &info)
+	testWrapper.AssertNoError(err)
+
+	if len(info.Segments) != 1 {
+		test.Errorf("Expected one segment, got %d", len(info.Segments))
+	}
+	for _, segment := range info.Segments {
+		if segment.Encryption != cipher+"-"+cipherMode {
+			test.Errorf("Expected encryption to be %s-%s, got %s", cipher, cipherMode, segment.Encryption)
+		}
+	}
+}
+
+func Test_Device_TokenJSON(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	// Format the device using aes-xts-plain64
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	out, err := device.TokenJSONGet(0)
+	testWrapper.AssertError(err) // no token set
+	if out != "" {
+		test.Errorf("Expected empty string, got %s", out)
+	}
+
+	type tokenStruct struct {
+		Type     string `json:"type"`
+		Keyslots []int  `json:"keyslots"`
+		Data     string `json:"data"`
+	}
+
+	newToken := tokenStruct{
+		Type:     "unit-test",
+		Keyslots: []int{},
+		Data:     "foo",
+	}
+	token, err := json.Marshal(newToken)
+	testWrapper.AssertNoError(err)
+
+	tokenID, err := device.TokenJSONSet(CRYPT_ANY_TOKEN, string(token))
+	testWrapper.AssertNoError(err)
+
+	out, err = device.TokenJSONGet(tokenID)
+	testWrapper.AssertNoError(err)
+
+	var tokenOut tokenStruct
+	err = json.Unmarshal([]byte(out), &tokenOut)
+	testWrapper.AssertNoError(err)
+
+	if tokenOut.Type != newToken.Type {
+		test.Errorf("Expected token type to be %s, got %s", newToken.Type, tokenOut.Type)
+	}
+	if len(tokenOut.Keyslots) != len(newToken.Keyslots) {
+		test.Errorf("Expected token keyslots to be %d, got %d", len(newToken.Keyslots), len(tokenOut.Keyslots))
+	}
+	if tokenOut.Data != newToken.Data {
+		test.Errorf("Expected token data to be %s, got %s", newToken.Data, tokenOut.Data)
 	}
 }

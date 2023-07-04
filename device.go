@@ -5,6 +5,7 @@ package cryptsetup
 // #include <stdlib.h>
 //extern int progress_callback(uint64_t size, uint64_t offset, void *usrptr);
 import "C"
+
 import (
 	"unsafe"
 )
@@ -60,6 +61,19 @@ func (device *Device) Free() bool {
 // C equivalent: crypt_dump
 func (device *Device) Dump() int {
 	return int(C.crypt_dump(device.cryptDevice))
+}
+
+// DumpJSON returns JSON-formatted information about a LUKS2 device.
+// C equivalent: crypt_dump_json
+func (device *Device) DumpJSON() (string, error) {
+	cStr := C.CString("")
+	defer C.free(unsafe.Pointer(cStr))
+
+	// crypt_dump_json does not support flags currently, but they are reserved for future use.
+	if res := C.crypt_dump_json(device.cryptDevice, &cStr, C.uint32_t(0)); res != 0 {
+		return "", &Error{functionName: "crypt_dump_json", code: int(res)}
+	}
+	return C.GoString(cStr), nil
 }
 
 // Type returns the device's type as a string.
@@ -349,4 +363,32 @@ func (device *Device) GetDeviceName() string {
 func (device *Device) GetUUID() string {
 	res := C.crypt_get_uuid(device.cryptDevice)
 	return C.GoString(res)
+}
+
+// TokenJSONGet gets content of a token definition in JSON format.
+// C equivalent: crypt_token_json_get
+func (device *Device) TokenJSONGet(token int) (string, error) {
+	cStr := C.CString("")
+	defer C.free(unsafe.Pointer(cStr))
+
+	if res := C.crypt_token_json_get(device.cryptDevice, C.int(token), &cStr); res < 0 {
+		return "", &Error{functionName: "crypt_token_json_get", code: int(res)}
+	}
+
+	return C.GoString(cStr), nil
+}
+
+// TokenJSONSet stores content of a token definition in JSON format.
+// Use CRYPT_ANY_TOKEN to allocate new one.
+// Returns allocated token ID on success, or an error otherwise.
+// C equivalent: crypt_token_json_set
+func (device *Device) TokenJSONSet(token int, json string) (int, error) {
+	cStr := C.CString(json)
+	defer C.free(unsafe.Pointer(cStr))
+
+	res := C.crypt_token_json_set(device.cryptDevice, C.int(token), cStr)
+	if res < 0 {
+		return -1, &Error{functionName: "crypt_token_json_set", code: int(res)}
+	}
+	return int(res), nil
 }
