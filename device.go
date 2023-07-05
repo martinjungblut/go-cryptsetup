@@ -289,40 +289,6 @@ func (device *Device) ActivateByToken(deviceName string, token int, usrptr strin
 	return nil
 }
 
-// ActivateByTokenPin activates a device or checks key using a token with PIN.
-// C equivalent: crypt_activate_by_token_pin
-func (device *Device) ActivateByTokenPin(deviceName string, tokenType string, token int, pin string, pinSize int, usrptr string, flags int) error {
-	var cryptDeviceName *C.char = nil
-	if len(deviceName) > 0 {
-		cryptDeviceName = C.CString(deviceName)
-		defer C.free(unsafe.Pointer(cryptDeviceName))
-	}
-
-	var cTokenType *C.char = nil
-	if len(tokenType) > 0 {
-		cTokenType = C.CString(tokenType)
-		defer C.free(unsafe.Pointer(cTokenType))
-	}
-
-	var cPin *C.char = nil
-	if len(pin) > 0 {
-		cPin = C.CString(pin)
-		defer C.free(unsafe.Pointer(cPin))
-	}
-
-	var cUsrptr *C.char = nil
-	if len(usrptr) > 0 {
-		cUsrptr = C.CString(usrptr)
-		defer C.free(unsafe.Pointer(cUsrptr))
-	}
-
-	err := C.crypt_activate_by_token_pin(device.cryptDevice, cryptDeviceName, cTokenType, C.int(token), cPin, C.size_t(pinSize), unsafe.Pointer(cUsrptr), C.uint32_t(flags))
-	if err < 0 {
-		return &Error{functionName: "crypt_activate_by_token_pin", code: int(err)}
-	}
-	return nil
-}
-
 // ActivateByVolumeKey activates a device by using a volume key.
 // If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
