@@ -284,8 +284,9 @@ func Test_Device_TokenJSON(test *testing.T) {
 		Data     string `json:"data"`
 	}
 
+	tokenType := "unit-test"
 	newToken := tokenStruct{
-		Type:     "unit-test",
+		Type:     tokenType,
 		Keyslots: []int{},
 		Data:     "foo",
 	}
@@ -310,6 +311,15 @@ func Test_Device_TokenJSON(test *testing.T) {
 	}
 	if tokenOut.Data != newToken.Data {
 		test.Errorf("Expected token data to be %s, got %s", newToken.Data, tokenOut.Data)
+	}
+
+	gotTokenType, status := device.TokenStatus(tokenID)
+	if gotTokenType != tokenType {
+		test.Errorf("Expected token type to be %s, got %s", tokenType, gotTokenType)
+	}
+	// Since we created a custom token without handler, that should be the status of the token
+	if status != CRYPT_TOKEN_EXTERNAL_UNKNOWN {
+		test.Errorf("Expected token status to be %d, got %d", CRYPT_TOKEN_EXTERNAL_UNKNOWN, status)
 	}
 }
 

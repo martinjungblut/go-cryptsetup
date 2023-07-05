@@ -473,3 +473,15 @@ func (device *Device) TokenIsAssigned(token int, keyslot int) error {
 	}
 	return nil
 }
+
+// TokenStatus gets info for specific token.
+// On success returns the token type as string.
+// C equivalent: crypt_token_status
+func (device *Device) TokenStatus(token int) (string, TokenInfo) {
+	cStr := C.CString("")
+	defer C.free(unsafe.Pointer(cStr))
+
+	res := C.crypt_token_status(device.cryptDevice, C.int(token), &cStr)
+	tokenInfo := TokenInfo(res)
+	return C.GoString(cStr), tokenInfo
+}
