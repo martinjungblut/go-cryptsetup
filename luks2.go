@@ -199,3 +199,8 @@ func (luks2 LUKS2) Unmanaged() (unsafe.Pointer, func()) {
 
 	return unsafe.Pointer(&cParams), deallocate
 }
+
+// TokenParamsLUKS2KeyRing defines LUKS2 keyring token parameters.
+type TokenParamsLUKS2Keyring struct {
+	KeyDescription string
+}

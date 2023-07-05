@@ -267,6 +267,62 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 	return nil
 }
 
+// ActivateByToken activates a device or checks key using a token.
+// C equivalent: crypt_activate_by_token
+func (device *Device) ActivateByToken(deviceName string, token int, usrptr string, flags int) error {
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
+
+	var cUsrptr *C.char = nil
+	if len(usrptr) > 0 {
+		cUsrptr = C.CString(usrptr)
+		defer C.free(unsafe.Pointer(cUsrptr))
+	}
+
+	err := C.crypt_activate_by_token(device.cryptDevice, cryptDeviceName, C.int(token), unsafe.Pointer(cUsrptr), C.uint32_t(flags))
+	if err < 0 {
+		return &Error{functionName: "crypt_activate_by_token", code: int(err)}
+	}
+	return nil
+}
+
+// ActivateByTokenPin activates a device or checks key using a token with PIN.
+// C equivalent: crypt_activate_by_token_pin
+func (device *Device) ActivateByTokenPin(deviceName string, tokenType string, token int, pin string, pinSize int, usrptr string, flags int) error {
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
+
+	var cTokenType *C.char = nil
+	if len(tokenType) > 0 {
+		cTokenType = C.CString(tokenType)
+		defer C.free(unsafe.Pointer(cTokenType))
+	}
+
+	var cPin *C.char = nil
+	if len(pin) > 0 {
+		cPin = C.CString(pin)
+		defer C.free(unsafe.Pointer(cPin))
+	}
+
+	var cUsrptr *C.char = nil
+	if len(usrptr) > 0 {
+		cUsrptr = C.CString(usrptr)
+		defer C.free(unsafe.Pointer(cUsrptr))
+	}
+
+	err := C.crypt_activate_by_token_pin(device.cryptDevice, cryptDeviceName, cTokenType, C.int(token), cPin, C.size_t(pinSize), unsafe.Pointer(cUsrptr), C.uint32_t(flags))
+	if err < 0 {
+		return &Error{functionName: "crypt_activate_by_token_pin", code: int(err)}
+	}
+	return nil
+}
+
 // ActivateByVolumeKey activates a device by using a volume key.
 // If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
@@ -376,6 +432,38 @@ func (device *Device) TokenJSONSet(token int, json string) (int, error) {
 	res := C.crypt_token_json_set(device.cryptDevice, C.int(token), cStr)
 	if res < 0 {
 		return -1, &Error{functionName: "crypt_token_json_set", code: int(res)}
+	}
+	return int(res), nil
+}
+
+// TokenLUKS2KeyRingGet gets LUKS2 keyring token params.
+// C equivalent: crypt_token_luks2_keyring_get
+func (device *Device) TokenLUKS2KeyRingGet(token int) (TokenParamsLUKS2Keyring, error) {
+	cParams := (*C.struct_crypt_token_params_luks2_keyring)(C.malloc(C.sizeof_struct_crypt_token_params_luks2_keyring))
+	defer C.free(unsafe.Pointer(cParams))
+
+	res := C.crypt_token_luks2_keyring_get(device.cryptDevice, C.int(token), cParams)
+	if res < 0 {
+		return TokenParamsLUKS2Keyring{}, &Error{functionName: "crypt_token_luks2_keyring_get", code: int(res)}
+	}
+
+	return TokenParamsLUKS2Keyring{
+		KeyDescription: C.GoString(cParams.key_description),
+	}, nil
+}
+
+// TokenLUKS2KeyRingSet creates a new luks2 keyring token.
+// C equivalent: crypt_token_luks2_keyring_set
+func (device *Device) TokenLUKS2KeyRingSet(token int, params TokenParamsLUKS2Keyring) (int, error) {
+	cKeyDescription := C.CString(params.KeyDescription)
+	defer C.free(unsafe.Pointer(cKeyDescription))
+	cParams := (*C.struct_crypt_token_params_luks2_keyring)(C.malloc(C.sizeof_struct_crypt_token_params_luks2_keyring))
+	defer C.free(unsafe.Pointer(cParams))
+	cParams.key_description = cKeyDescription
+
+	res := C.crypt_token_luks2_keyring_set(device.cryptDevice, C.int(token), cParams)
+	if res < 0 {
+		return -1, &Error{functionName: "crypt_token_luks2_keyring_set", code: int(res)}
 	}
 	return int(res), nil
 }
