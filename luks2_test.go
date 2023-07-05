@@ -388,12 +388,57 @@ func Test_LUKS2_Resize(test *testing.T) {
 	err = device.Format(LUKS2{SectorSize: 512}, genericParams)
 	testWrapper.AssertNoError(err)
 
+	resize(resizeDiskPath)
+
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 	defer device.Deactivate(DeviceName)
 
-	resize(resizeDiskPath)
-
 	err = device.Resize(DeviceName, 0)
 	testWrapper.AssertNoError(err)
+}
+
+func Test_LUKS2_ActivateByToken(test *testing.T) {
+	testWrapper := TestWrapper{test}
+	luks2 := LUKS2{SectorSize: 512}
+
+	genericParams := GenericParams{
+		Cipher:        "aes",
+		CipherMode:    "xts-plain64",
+		VolumeKey:     generateKey(512/8, test),
+		VolumeKeySize: 512 / 8,
+	}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	err = device.Format(luks2, genericParams)
+	testWrapper.AssertNoError(err)
+
+	err = device.KeyslotAddByVolumeKey(0, "", "testPassphrase")
+	testWrapper.AssertNoError(err)
+	device.Free()
+
+	device, err = Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	err = device.Load(nil)
+	testWrapper.AssertNoError(err)
+
+	tokenParams := TokenParamsLUKS2Keyring{KeyDescription: "testKeyDescription"}
+	tokenID, err := device.TokenLUKS2KeyRingSet(CRYPT_ANY_TOKEN, tokenParams)
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenAssignKeyslot(CRYPT_ANY_TOKEN, CRYPT_ANY_SLOT)
+	testWrapper.AssertNoError(err)
+
+	// Assert that the token was set
+	token, err := device.TokenLUKS2KeyRingGet(tokenID)
+	testWrapper.AssertNoError(err)
+	if token.KeyDescription != tokenParams.KeyDescription {
+		test.Errorf("Expected token key description to be %s, but got %s", tokenParams.KeyDescription, token.KeyDescription)
+	}
+
+	// Activate by token
+	err = device.ActivateByToken(DeviceName, tokenID, "unitTest", CRYPT_ACTIVATE_READONLY)
+	// Since we don't have any real tokens in the keyring we expect an error
+	testWrapper.AssertError(err)
 }

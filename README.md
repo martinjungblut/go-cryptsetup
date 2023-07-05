@@ -39,13 +39,16 @@ This project is a _pure Go interface for libcryptsetup_, providing a clean and p
 
 These bindings have been tested using libcryptsetup >= 2.0.
 
+Since the latest LTS release of Ubuntu (22.04) currently ships libcryptsetup v2.2.2, functions that require a newer version are gated behind build tags.
+To use functions requiring libcryptsetup v2.4, build your application with `-tags="cryptsetup2.4"`.
+
 GitHub Actions runs the test suite using the following version combinations:
 
-| Ubuntu version | Go version | libcryptsetup version |
-|----------------|------------|-----------------------|
-| 20.04 LTS      | 1.18       | 2.2.2                 |
-| 20.04 LTS      | 1.17       | 2.2.2                 |
-| 18.04 LTS      | 1.16       | 2.0.2                 |
+| OS               | Go version | libcryptsetup version |
+|------------------|------------|-----------------------|
+| Fedora 38        | 1.20       | 2.6.1                 |
+| Ubuntu 20.04 LTS | 1.18       | 2.2.2                 |
+| Ubuntu 20.04 LTS | 1.17       | 2.2.2                 |
 
 Locally, I also test on Fedora, using the latest version of libcryptsetup and Go.
 

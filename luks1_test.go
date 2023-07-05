@@ -244,11 +244,11 @@ func Test_LUKS1_Resize(test *testing.T) {
 	err = device.Format(LUKS1{Hash: "sha256"}, genericParams)
 	testWrapper.AssertNoError(err)
 
+	resize(resizeDiskPath)
+
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 	defer device.Deactivate(DeviceName)
-
-	resize(resizeDiskPath)
 
 	err = device.Resize(DeviceName, 0)
 	testWrapper.AssertNoError(err)

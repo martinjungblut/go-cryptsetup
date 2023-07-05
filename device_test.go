@@ -1,6 +1,7 @@
 package cryptsetup
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -259,4 +260,106 @@ func Test_Device_GetUUID(test *testing.T) {
 	if uid != newUUID {
 		test.Errorf("Returned a different UUID than was set for the device: got %s, expected %s", uid, newUUID)
 	}
+}
+
+func Test_Device_TokenJSON(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	out, err := device.TokenJSONGet(0)
+	testWrapper.AssertError(err) // no token set
+	if out != "" {
+		test.Errorf("Expected empty string, got %s", out)
+	}
+
+	type tokenStruct struct {
+		Type     string `json:"type"`
+		Keyslots []int  `json:"keyslots"`
+		Data     string `json:"data"`
+	}
+
+	tokenType := "unit-test"
+	newToken := tokenStruct{
+		Type:     tokenType,
+		Keyslots: []int{},
+		Data:     "foo",
+	}
+	token, err := json.Marshal(newToken)
+	testWrapper.AssertNoError(err)
+
+	tokenID, err := device.TokenJSONSet(CRYPT_ANY_TOKEN, string(token))
+	testWrapper.AssertNoError(err)
+
+	out, err = device.TokenJSONGet(tokenID)
+	testWrapper.AssertNoError(err)
+
+	var tokenOut tokenStruct
+	err = json.Unmarshal([]byte(out), &tokenOut)
+	testWrapper.AssertNoError(err)
+
+	if tokenOut.Type != newToken.Type {
+		test.Errorf("Expected token type to be %s, got %s", newToken.Type, tokenOut.Type)
+	}
+	if len(tokenOut.Keyslots) != len(newToken.Keyslots) {
+		test.Errorf("Expected token keyslots to be %d, got %d", len(newToken.Keyslots), len(tokenOut.Keyslots))
+	}
+	if tokenOut.Data != newToken.Data {
+		test.Errorf("Expected token data to be %s, got %s", newToken.Data, tokenOut.Data)
+	}
+
+	gotTokenType, status := device.TokenStatus(tokenID)
+	if gotTokenType != tokenType {
+		test.Errorf("Expected token type to be %s, got %s", tokenType, gotTokenType)
+	}
+	// Since we created a custom token without handler, that should be the status of the token
+	if status != CRYPT_TOKEN_EXTERNAL_UNKNOWN {
+		test.Errorf("Expected token status to be %d, got %d", CRYPT_TOKEN_EXTERNAL_UNKNOWN, status)
+	}
+}
+
+func Test_Device_TokenAssignKeyslot(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	keyslot := 0
+	tokenID := 0
+	err = device.KeyslotAddByVolumeKey(keyslot, "", "firstPassphrase")
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertError(err) // No tokens defined yet
+
+	// No tokens defined yet
+	err = device.TokenAssignKeyslot(tokenID, CRYPT_ANY_SLOT)
+	testWrapper.AssertError(err)
+
+	// Set a token
+	_, err = device.TokenJSONSet(CRYPT_ANY_TOKEN, `{"type":"test","keyslots":[],"data":"foo"}`)
+	testWrapper.AssertNoError(err)
+
+	// Assign the token to keyslot
+	err = device.TokenAssignKeyslot(CRYPT_ANY_TOKEN, CRYPT_ANY_SLOT)
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertNoError(err)
+
+	// Remove token assignment
+	err = device.TokenUnassignKeyslot(CRYPT_ANY_TOKEN, CRYPT_ANY_SLOT)
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertError(err)
 }

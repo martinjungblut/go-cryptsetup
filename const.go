@@ -176,3 +176,21 @@ const (
 	/**< Compatibility only, do not use (Gutmann method) */
 	CRYPT_WIPE_SPECIAL = C.CRYPT_WIPE_SPECIAL
 )
+
+// TokenInfo is an enum type for token information.
+type TokenInfo int
+
+const (
+	// token is invalid.
+	CRYPT_TOKEN_INVALID = C.CRYPT_TOKEN_INVALID
+	// token is empty (free).
+	CRYPT_TOKEN_INACTIVE = C.CRYPT_TOKEN_INACTIVE
+	// active internal token with driver.
+	CRYPT_TOKEN_INTERNAL = C.CRYPT_TOKEN_INTERNAL
+	// active internal token (reserved name) with missing token driver.
+	CRYPT_TOKEN_INTERNAL_UNKNOWN = C.CRYPT_TOKEN_INTERNAL_UNKNOWN
+	// active external (user defined) token with driver
+	CRYPT_TOKEN_EXTERNAL = C.CRYPT_TOKEN_EXTERNAL
+	// active external (user defined) token with missing token driver
+	CRYPT_TOKEN_EXTERNAL_UNKNOWN = C.CRYPT_TOKEN_EXTERNAL_UNKNOWN
+)

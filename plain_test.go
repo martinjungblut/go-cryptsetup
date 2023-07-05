@@ -152,11 +152,11 @@ func Test_Plain_Resize(test *testing.T) {
 	err = device.Format(Plain{Hash: "sha256"}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
 	testWrapper.AssertNoError(err)
 
+	resize(resizeDiskPath)
+
 	err = device.ActivateByPassphrase(DeviceName, 0, PassKey, CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 	defer device.Deactivate(DeviceName)
-
-	resize(resizeDiskPath)
 
 	err = device.Resize(DeviceName, 0)
 	testWrapper.AssertNoError(err)

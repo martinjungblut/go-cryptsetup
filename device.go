@@ -5,6 +5,7 @@ package cryptsetup
 // #include <stdlib.h>
 //extern int progress_callback(uint64_t size, uint64_t offset, void *usrptr);
 import "C"
+
 import (
 	"unsafe"
 )
@@ -266,6 +267,28 @@ func (device *Device) ActivateByPassphrase(deviceName string, keyslot int, passp
 	return nil
 }
 
+// ActivateByToken activates a device or checks key using a token.
+// C equivalent: crypt_activate_by_token
+func (device *Device) ActivateByToken(deviceName string, token int, usrptr string, flags int) error {
+	var cryptDeviceName *C.char = nil
+	if len(deviceName) > 0 {
+		cryptDeviceName = C.CString(deviceName)
+		defer C.free(unsafe.Pointer(cryptDeviceName))
+	}
+
+	var cUsrptr *C.char = nil
+	if len(usrptr) > 0 {
+		cUsrptr = C.CString(usrptr)
+		defer C.free(unsafe.Pointer(cUsrptr))
+	}
+
+	err := C.crypt_activate_by_token(device.cryptDevice, cryptDeviceName, C.int(token), unsafe.Pointer(cUsrptr), C.uint32_t(flags))
+	if err < 0 {
+		return &Error{functionName: "crypt_activate_by_token", code: int(err)}
+	}
+	return nil
+}
+
 // ActivateByVolumeKey activates a device by using a volume key.
 // If deviceName is empty only check passphrase.
 // Returns nil on success, or an error otherwise.
@@ -349,4 +372,116 @@ func (device *Device) GetDeviceName() string {
 func (device *Device) GetUUID() string {
 	res := C.crypt_get_uuid(device.cryptDevice)
 	return C.GoString(res)
+}
+
+// TokenJSONGet gets content of a token definition in JSON format.
+// C equivalent: crypt_token_json_get
+func (device *Device) TokenJSONGet(token int) (string, error) {
+	cStr := C.CString("")
+	defer C.free(unsafe.Pointer(cStr))
+
+	if res := C.crypt_token_json_get(device.cryptDevice, C.int(token), &cStr); res < 0 {
+		return "", &Error{functionName: "crypt_token_json_get", code: int(res)}
+	}
+
+	return C.GoString(cStr), nil
+}
+
+// TokenJSONSet stores content of a token definition in JSON format.
+// Use CRYPT_ANY_TOKEN to allocate new one.
+// Returns allocated token ID on success, or an error otherwise.
+// C equivalent: crypt_token_json_set
+func (device *Device) TokenJSONSet(token int, json string) (int, error) {
+	cStr := C.CString(json)
+	defer C.free(unsafe.Pointer(cStr))
+
+	res := C.crypt_token_json_set(device.cryptDevice, C.int(token), cStr)
+	if res < 0 {
+		return -1, &Error{functionName: "crypt_token_json_set", code: int(res)}
+	}
+	return int(res), nil
+}
+
+// TokenLUKS2KeyRingGet gets LUKS2 keyring token params.
+// C equivalent: crypt_token_luks2_keyring_get
+func (device *Device) TokenLUKS2KeyRingGet(token int) (TokenParamsLUKS2Keyring, error) {
+	cParams := (*C.struct_crypt_token_params_luks2_keyring)(C.malloc(C.sizeof_struct_crypt_token_params_luks2_keyring))
+	defer C.free(unsafe.Pointer(cParams))
+
+	res := C.crypt_token_luks2_keyring_get(device.cryptDevice, C.int(token), cParams)
+	if res < 0 {
+		return TokenParamsLUKS2Keyring{}, &Error{functionName: "crypt_token_luks2_keyring_get", code: int(res)}
+	}
+
+	return TokenParamsLUKS2Keyring{
+		KeyDescription: C.GoString(cParams.key_description),
+	}, nil
+}
+
+// TokenLUKS2KeyRingSet creates a new luks2 keyring token.
+// C equivalent: crypt_token_luks2_keyring_set
+func (device *Device) TokenLUKS2KeyRingSet(token int, params TokenParamsLUKS2Keyring) (int, error) {
+	cKeyDescription := C.CString(params.KeyDescription)
+	defer C.free(unsafe.Pointer(cKeyDescription))
+	cParams := (*C.struct_crypt_token_params_luks2_keyring)(C.malloc(C.sizeof_struct_crypt_token_params_luks2_keyring))
+	defer C.free(unsafe.Pointer(cParams))
+	cParams.key_description = cKeyDescription
+
+	res := C.crypt_token_luks2_keyring_set(device.cryptDevice, C.int(token), cParams)
+	if res < 0 {
+		return -1, &Error{functionName: "crypt_token_luks2_keyring_set", code: int(res)}
+	}
+	return int(res), nil
+}
+
+// TokenAssignKeyslot assigns a token to particular keyslot. (There can be more keyslots assigned to one token id.)
+// Use CRYPT_ANY_TOKEN to assign all tokens to keyslot.
+// Use CRYPT_ANY SLOT to assign all active keyslots to token.
+// C equivalent: crypt_token_assign_keyslot
+func (device *Device) TokenAssignKeyslot(token int, keyslot int) error {
+	res := C.crypt_token_assign_keyslot(device.cryptDevice, C.int(token), C.int(keyslot))
+
+	// libcryptsetup returns the token ID on success
+	// In case of CRYPT_ANY_TOKEN, the token ID is -1,
+	// so we need to make sure the response is actually an error instead of a token ID
+	resAnyToken := token == CRYPT_ANY_TOKEN && int(res) == token
+	if res < 0 && !resAnyToken {
+		return &Error{functionName: "crypt_token_assign_keyslot", code: int(res)}
+	}
+	return nil
+}
+
+// TokenUnassignKeyslot unassigns a token from particular keyslot.
+// There can be more keyslots assigned to one token id.
+// Use CRYPT_ANY_TOKEN to unassign all tokens from keyslot.
+// Use CRYPT_ANY SLOT to unassign all active keyslots from token.
+// C equivalent: crypt_token_unassign_keyslot
+func (device *Device) TokenUnassignKeyslot(token int, keyslot int) error {
+	res := C.crypt_token_unassign_keyslot(device.cryptDevice, C.int(token), C.int(keyslot))
+	resAnyToken := token == CRYPT_ANY_TOKEN && int(res) == token
+	if res < 0 && !resAnyToken {
+		return &Error{functionName: "crypt_token_assign_keyslot", code: int(res)}
+	}
+	return nil
+}
+
+// TokenIsAssigned gets info about token assignment to particular keyslot.
+// C equivalent: crypt_token_is_assigned
+func (device *Device) TokenIsAssigned(token int, keyslot int) error {
+	if res := C.crypt_token_is_assigned(device.cryptDevice, C.int(token), C.int(keyslot)); res < 0 {
+		return &Error{functionName: "crypt_token_is_assigned", code: int(res)}
+	}
+	return nil
+}
+
+// TokenStatus gets info for specific token.
+// On success returns the token type as string.
+// C equivalent: crypt_token_status
+func (device *Device) TokenStatus(token int) (string, TokenInfo) {
+	cStr := C.CString("")
+	defer C.free(unsafe.Pointer(cStr))
+
+	res := C.crypt_token_status(device.cryptDevice, C.int(token), &cStr)
+	tokenInfo := TokenInfo(res)
+	return C.GoString(cStr), tokenInfo
 }

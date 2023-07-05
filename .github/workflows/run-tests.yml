@@ -1,11 +1,23 @@
 name: run-tests
 on: [push]
 jobs:
+  fedora-38-go-1-20:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:38
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - run: dnf install -y gcc pkg-config cryptsetup-libs cryptsetup-devel
+      - run: go test -tags="cryptsetup2.4" -v ./...
   ubuntu-20-04-go-1-18:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: '1.18'
       - run: sudo apt-get update
@@ -14,20 +26,10 @@ jobs:
   ubuntu-20-04-go-1-17:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: '1.17'
-      - run: sudo apt-get update
-      - run: sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
-      - run: sudo go test -v ./...
-  ubuntu-18-04-go-1-16:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '1.16'
       - run: sudo apt-get update
       - run: sudo apt-get install -y libcryptsetup12 libcryptsetup-dev
       - run: sudo go test -v ./...
