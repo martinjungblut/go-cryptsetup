@@ -392,3 +392,43 @@ func (device *Device) TokenJSONSet(token int, json string) (int, error) {
 	}
 	return int(res), nil
 }
+
+// TokenAssignKeyslot assigns a token to particular keyslot. (There can be more keyslots assigned to one token id.)
+// Use CRYPT_ANY_TOKEN to assign all tokens to keyslot.
+// Use CRYPT_ANY SLOT to assign all active keyslots to token.
+// C equivalent: crypt_token_assign_keyslot
+func (device *Device) TokenAssignKeyslot(token int, keyslot int) error {
+	res := C.crypt_token_assign_keyslot(device.cryptDevice, C.int(token), C.int(keyslot))
+
+	// libcryptsetup returns the token ID on success
+	// In case of CRYPT_ANY_TOKEN, the token ID is -1,
+	// so we need to make sure the response is actually an error instead of a token ID
+	resAnyToken := token == CRYPT_ANY_TOKEN && int(res) == token
+	if res < 0 && !resAnyToken {
+		return &Error{functionName: "crypt_token_assign_keyslot", code: int(res)}
+	}
+	return nil
+}
+
+// TokenUnassignKeyslot unassigns a token from particular keyslot.
+// There can be more keyslots assigned to one token id.
+// Use CRYPT_ANY_TOKEN to unassign all tokens from keyslot.
+// Use CRYPT_ANY SLOT to unassign all active keyslots from token.
+// C equivalent: crypt_token_unassign_keyslot
+func (device *Device) TokenUnassignKeyslot(token int, keyslot int) error {
+	res := C.crypt_token_unassign_keyslot(device.cryptDevice, C.int(token), C.int(keyslot))
+	resAnyToken := token == CRYPT_ANY_TOKEN && int(res) == token
+	if res < 0 && !resAnyToken {
+		return &Error{functionName: "crypt_token_assign_keyslot", code: int(res)}
+	}
+	return nil
+}
+
+// TokenIsAssigned gets info about token assignment to particular keyslot.
+// C equivalent: crypt_token_is_assigned
+func (device *Device) TokenIsAssigned(token int, keyslot int) error {
+	if res := C.crypt_token_is_assigned(device.cryptDevice, C.int(token), C.int(keyslot)); res < 0 {
+		return &Error{functionName: "crypt_token_is_assigned", code: int(res)}
+	}
+	return nil
+}

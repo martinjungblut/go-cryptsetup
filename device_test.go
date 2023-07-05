@@ -307,7 +307,6 @@ func Test_Device_TokenJSON(test *testing.T) {
 	testWrapper.AssertNoError(err)
 	defer device.Free()
 
-	// Format the device using aes-xts-plain64
 	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
 	testWrapper.AssertNoError(err)
 
@@ -350,4 +349,45 @@ func Test_Device_TokenJSON(test *testing.T) {
 	if tokenOut.Data != newToken.Data {
 		test.Errorf("Expected token data to be %s, got %s", newToken.Data, tokenOut.Data)
 	}
+}
+
+func Test_Device_TokenAssignKeyslot(test *testing.T) {
+	testWrapper := TestWrapper{test}
+
+	device, err := Init(DevicePath)
+	testWrapper.AssertNoError(err)
+	defer device.Free()
+
+	err = device.Format(LUKS2{SectorSize: 512}, GenericParams{Cipher: "aes", CipherMode: "xts-plain64", VolumeKeySize: 512 / 8})
+	testWrapper.AssertNoError(err)
+
+	keyslot := 0
+	tokenID := 0
+	err = device.KeyslotAddByVolumeKey(keyslot, "", "firstPassphrase")
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertError(err) // No tokens defined yet
+
+	// No tokens defined yet
+	err = device.TokenAssignKeyslot(tokenID, CRYPT_ANY_SLOT)
+	testWrapper.AssertError(err)
+
+	// Set a token
+	_, err = device.TokenJSONSet(CRYPT_ANY_TOKEN, `{"type":"test","keyslots":[],"data":"foo"}`)
+	testWrapper.AssertNoError(err)
+
+	// Assign the token to keyslot
+	err = device.TokenAssignKeyslot(CRYPT_ANY_TOKEN, CRYPT_ANY_SLOT)
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertNoError(err)
+
+	// Remove token assignment
+	err = device.TokenUnassignKeyslot(CRYPT_ANY_TOKEN, CRYPT_ANY_SLOT)
+	testWrapper.AssertNoError(err)
+
+	err = device.TokenIsAssigned(tokenID, keyslot)
+	testWrapper.AssertError(err)
 }
