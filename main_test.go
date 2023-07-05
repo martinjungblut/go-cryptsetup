@@ -11,27 +11,32 @@ import (
 	"testing"
 )
 
-const DevicePath string = "testDevice"
-const DeviceName string = "testDeviceName"
-const PassKey string = "testPassKey"
+const (
+	DevicePath string = "testDevice"
+	DeviceName string = "testDeviceName"
+	PassKey    string = "testPassKey"
+)
 
 type TestWrapper struct {
 	test *testing.T
 }
 
 func (testWrapper TestWrapper) AssertError(err error) {
+	testWrapper.test.Helper()
 	if err == nil {
 		testWrapper.test.Error("Operation should have failed, but didn't.")
 	}
 }
 
 func (testWrapper TestWrapper) AssertNoError(err error) {
+	testWrapper.test.Helper()
 	if err != nil {
 		testWrapper.test.Error(err)
 	}
 }
 
 func (testWrapper TestWrapper) AssertErrorCodeEquals(err error, expectedErrorCode int) {
+	testWrapper.test.Helper()
 	actualErrorCode := err.(*Error).Code()
 
 	if actualErrorCode != expectedErrorCode {
@@ -40,16 +45,15 @@ func (testWrapper TestWrapper) AssertErrorCodeEquals(err error, expectedErrorCod
 }
 
 func getFileMD5(filePath string, test *testing.T) string {
-	fileHandle, error := os.Open(filePath)
-	if error != nil {
-		test.Error(error)
+	fileHandle, err := os.Open(filePath)
+	if err != nil {
+		test.Error(err)
 	}
 	defer fileHandle.Close()
 
 	hash := md5.New()
-	_, error = io.Copy(hash, fileHandle)
-	if error != nil {
-		test.Error(error)
+	if _, err = io.Copy(hash, fileHandle); err != nil {
+		test.Error(err)
 	}
 
 	return hex.EncodeToString(hash.Sum(nil)[:16])
@@ -58,8 +62,7 @@ func getFileMD5(filePath string, test *testing.T) string {
 func generateKey(length int, test *testing.T) string {
 	bytes := make([]byte, length)
 
-	_, err := rand.Read(bytes)
-	if err != nil {
+	if _, err := rand.Read(bytes); err != nil {
 		test.Error("Error while generating key.")
 	}
 
@@ -67,15 +70,21 @@ func generateKey(length int, test *testing.T) string {
 }
 
 func setup(devicePath string) {
-	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=64M", "count=1").Run()
+	if err := exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=64M", "count=1").Run(); err != nil {
+		panic(err)
+	}
 }
 
 func teardown(devicePath string) {
-	exec.Command("/bin/rm", "-f", devicePath).Run()
+	if err := exec.Command("/bin/rm", "-f", devicePath).Run(); err != nil {
+		panic(err)
+	}
 }
 
 func resize(devicePath string) {
-	exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=32M", "count=1", "oflag=append", "conv=notrunc").Run()
+	if err := exec.Command("/bin/dd", "if=/dev/zero", fmt.Sprintf("of=%s", devicePath), "bs=32M", "count=1", "oflag=append", "conv=notrunc").Run(); err != nil {
+		panic(err)
+	}
 }
 
 func TestMain(m *testing.M) {

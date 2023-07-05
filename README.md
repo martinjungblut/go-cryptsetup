@@ -41,11 +41,11 @@ These bindings have been tested using libcryptsetup >= 2.0.
 
 GitHub Actions runs the test suite using the following version combinations:
 
-| Ubuntu version | Go version | libcryptsetup version |
-|----------------|------------|-----------------------|
-| 20.04 LTS      | 1.18       | 2.2.2                 |
-| 20.04 LTS      | 1.17       | 2.2.2                 |
-| 18.04 LTS      | 1.16       | 2.0.2                 |
+| OS               | Go version | libcryptsetup version |
+|------------------|------------|-----------------------|
+| Fedora 38        | 1.20       | 2.6.1                 |
+| Ubuntu 20.04 LTS | 1.18       | 2.2.2                 |
+| Ubuntu 20.04 LTS | 1.17       | 2.2.2                 |
 
 Locally, I also test on Fedora, using the latest version of libcryptsetup and Go.
 
