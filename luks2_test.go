@@ -388,11 +388,11 @@ func Test_LUKS2_Resize(test *testing.T) {
 	err = device.Format(LUKS2{SectorSize: 512}, genericParams)
 	testWrapper.AssertNoError(err)
 
+	resize(resizeDiskPath)
+
 	err = device.ActivateByVolumeKey(DeviceName, genericParams.VolumeKey, genericParams.VolumeKeySize, CRYPT_ACTIVATE_READONLY)
 	testWrapper.AssertNoError(err)
 	defer device.Deactivate(DeviceName)
-
-	resize(resizeDiskPath)
 
 	err = device.Resize(DeviceName, 0)
 	testWrapper.AssertNoError(err)
