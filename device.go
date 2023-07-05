@@ -63,19 +63,6 @@ func (device *Device) Dump() int {
 	return int(C.crypt_dump(device.cryptDevice))
 }
 
-// DumpJSON returns JSON-formatted information about a LUKS2 device.
-// C equivalent: crypt_dump_json
-func (device *Device) DumpJSON() (string, error) {
-	cStr := C.CString("")
-	defer C.free(unsafe.Pointer(cStr))
-
-	// crypt_dump_json does not support flags currently, but they are reserved for future use.
-	if res := C.crypt_dump_json(device.cryptDevice, &cStr, C.uint32_t(0)); res != 0 {
-		return "", &Error{functionName: "crypt_dump_json", code: int(res)}
-	}
-	return C.GoString(cStr), nil
-}
-
 // Type returns the device's type as a string.
 // Returns an empty string if the information is not available.
 func (device *Device) Type() string {

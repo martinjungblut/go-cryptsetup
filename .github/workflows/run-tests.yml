@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: '1.20'
       - run: dnf install -y gcc pkg-config cryptsetup-libs cryptsetup-devel
-      - run: go test -v ./...
+      - run: go test -tags="cryptsetup2.4" -v ./...
   ubuntu-20-04-go-1-18:
     runs-on: ubuntu-20.04
     steps:
